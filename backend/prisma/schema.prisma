@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  roleId    Int
+  name      String
+  email     String    @unique
+  password  String
+  phone     String?
+  roleType  String
+  patients  Patient[] @relation("Maintainer")
+  trackings Tracking[] @relation("UserTracking")
+  createdAt DateTime  @default(now())
+}
+
+model Patient {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  height      Float?
+  weight      Float?
+  disease     String?
+  allergies   String?
+  vitalMeasurements VitalMeasurement[]
+  alerts      Alert[]
+  ownUsers    User[]    @relation("Owner", through: Own)
+  maintainers User[]    @relation("Maintainer")
+  trackings   Tracking[] @relation("PatientTracking")
+
+  @@index([userId])
+}
+
+model VitalMeasurement {
+  id          Int       @id @default(autoincrement())
+  patientId   Int
+  vitalTypeId Int
+  value       Float
+  notes       String?
+  recordDate  DateTime
+  recordTime  DateTime
+  creatorId   Int
+  alerts      Alert[]
+  trigger     Trigger?
+
+  vitalType   VitalType @relation(fields: [vitalTypeId], references: [id])
+  patient     Patient   @relation(fields: [patientId], references: [id])
+}
+
+model VitalType {
+  id          Int       @id @default(autoincrement())
+  typeName    String
+  unit        String
+  upperBound  Float
+  lowerBound  Float
+  measurements VitalMeasurement[]
+}
+
+model Alert {
+  id             Int       @id @default(autoincrement())
+  patientId      Int
+  alertType      String
+  alertMessage   String
+  alertTime      DateTime
+  vitalMeasurementId Int
+
+  vitalMeasurement VitalMeasurement @relation(fields: [vitalMeasurementId], references: [id])
+  patient          Patient          @relation(fields: [patientId], references: [id])
+  trigger          Trigger?
+}
+
+model Trigger {
+  id                 Int    @id @default(autoincrement())
+  vitalMeasurementId Int
+  alertId            Int
+
+  alert              Alert           @relation(fields: [alertId], references: [id])
+  vitalMeasurement   VitalMeasurement @relation(fields: [vitalMeasurementId], references: [id])
+}
+
+model Tracking {
+  id        Int    @id @default(autoincrement())
+  userId    Int
+  patientId Int
+  roleId    Int
+
+  user      User    @relation("UserTracking", fields: [userId], references: [id])
+  patient   Patient @relation("PatientTracking", fields: [patientId], references: [id])
+}
+
+model Own {
+  id        Int    @id @default(autoincrement())
+  userId    Int
+  patientId Int
+
+  @@unique([userId, patientId])
+}
+
+
+
