@@ -10,6 +10,7 @@
 ---
 
 ### 專案目錄結構
+```
 .
 ├── frontend/
 │   ├── app/
@@ -56,7 +57,7 @@
     ├── tsconfig.json
     └── package.json
 
-
+```
 ---
 
 ### Step 1：安裝 Node.js（建議版本 ≥ 18.17）
