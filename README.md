@@ -126,3 +126,26 @@ export default function handler(req, res) {
 }
 
 ```
+
+### pkg to install
+
+npm
+```
+install npm
+```
+@prisma/client
+```
+npm install @prisma/client
+```
+bcrypt
+```
+npm i --save-dev @types/bcrypt
+```
+ts-node
+```
+npm install --save-dev ts-node typescript
+```
+express
+```
+npm install --save-dev @types/express
+```
