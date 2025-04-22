@@ -1,3 +1,3 @@
-import { logout } from '@/src/users/controllers/logout';
+import { logout } from '@/controllers/logoutController';
 
 export default logout;

@@ -1,3 +1,3 @@
-import { signUp } from '@/src/users/controllers/signUp';
+import { signUp } from '@/controllers/signupController';
 
 export default signUp;

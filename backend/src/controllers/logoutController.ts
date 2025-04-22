@@ -15,10 +15,17 @@ export const logout = async (req: NextApiRequest, res: NextApiResponse) => {
       success: true,
       message: '登出成功',
     });
-  } catch (err: any) {
+  } catch (err) {
+    if (err instanceof Error) {
+      return res.status(500).json({
+        success: false,
+        message: `內部錯誤: ${err.message}`,
+      });
+    }
+
     return res.status(500).json({
       success: false,
-      message: `內部錯誤: ${err.message}`,
+      message: '未知錯誤',
     });
   }
 };

@@ -1,15 +1,19 @@
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcrypt';
-import { validatePassword } from '@/utils/passwordUtils';
 
-export const signUp = async (req, res) => {
+// 帳號密碼規則
+import { validatePassword } from '@/utils/passwordUtils';
+import { NextApiRequest, NextApiResponse } from 'next';
+
+
+export const signUp = async (req:NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') return res.status(405).end();
 
   try {
     const { email, username, password } = req.body;
 
     if (!email || !username || !password) {
-      return res.status(400).json({ message: '缺少必要字段' });
+      return res.status(400).json({ message: '缺少必填字段' });
     }
 
     const valid = validatePassword(password);
@@ -20,16 +24,17 @@ export const signUp = async (req, res) => {
     const existingEmail = await prisma.user.findUnique({ where: { email } });
     if (existingEmail) return res.status(400).json({ message: '電子郵件已存在' });
 
-    const existingUsername = await prisma.user.findUnique({ where: { username } });
+    const existingUsername = await prisma.user.findUnique({ where: { name :username } });
     if (existingUsername) return res.status(400).json({ message: '用戶名已存在' });
 
     const hashed = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: {
-        email,
-        username,
+        name:username,
+        email:email,
         password: hashed,
-        emailVerified: false,
+        phone:'',
+        role: 0,
       },
     });
 
@@ -37,7 +42,7 @@ export const signUp = async (req, res) => {
       profile: {
         uid: user.id,
         email: user.email,
-        username: user.username,
+        username: user.name,
         date: user.createdAt,
       },
     });
