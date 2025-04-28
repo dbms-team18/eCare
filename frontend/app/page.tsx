@@ -1,6 +1,45 @@
-import Image from "next/image";
 
-export default function Home() {
+//import Image from "next/image";
+'use client'
+
+import { useRouter } from 'next/navigation'
+import Button from '../components/Button' 
+
+export default function HomePage() {
+  const router = useRouter()
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#d6f5f0] px-4">
+      <div className="bg-white p-10 rounded-2xl shadow-lg w-[90%] max-w-lg text-center">
+        <h1 className="text-3xl font-bold mb-3 text-[#1f2937]">e-Care健康照護系統</h1>
+        <p className="text-gray-600 mb-3">您的健康我們來守護</p>
+
+        <img 
+          src="/elderly-care.jpg" 
+          alt="照顧老人插圖" 
+          className="mx-auto mb-6 w-64 h-64 object-contain"
+        />
+
+        <div className="flex flex-col gap-5">
+          <Button
+            label="登入"
+            onClick={() => router.push('/user/login')}
+            className="w-full py-2 text-sm"
+          />
+          <Button
+            label="註冊"
+            onClick={() => router.push('/user/signup')}
+            className="w-full py-2 text-sm"
+          />
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
+
+/*export default function Home() {
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
@@ -100,4 +139,4 @@ export default function Home() {
       </footer>
     </div>
   );
-}
+}*/
