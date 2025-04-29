@@ -149,3 +149,8 @@ express
 ```
 npm install --save-dev @types/express
 ```
+
+mySQL2
+```
+npm install mysql2
+```
