@@ -1,5 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import mysqlConnectionPool from "../../lib/mysql";
 import { NextApiRequest, NextApiResponse } from "next";
+import { ResultSetHeader } from "mysql2";
 
 export const createVitalSign = async (
   req: NextApiRequest,
@@ -28,59 +29,68 @@ export const createVitalSign = async (
     return res.status(400).json({ success: false, err: "缺少必要欄位" });
   }
 
-  const vitalSignData: any = {};
-  // 使用 let 因為後面還會賦值
   // 根據 typeId 決定要儲存的生理資料
+  let value: number | null = null;
   switch (typeId) {
     case 1: // bloodSugar
       if (bloodSugar !== undefined) {
-        vitalSignData.value = bloodSugar;
+        value = bloodSugar;
       }
       break;
     case 2: // systolic
       if (systolic !== undefined) {
-        vitalSignData.value = systolic;
+        value = systolic;
       }
       break;
     case 3: // diastolic
       if (diastolic !== undefined) {
-        vitalSignData.value = diastolic;
+        value = diastolic;
       }
       break;
     case 4: // bloodO2
       if (bloodO2 !== undefined) {
-        vitalSignData.value = bloodO2;
+        value = bloodO2;
       }
       break;
     case 5: // heartRate
       if (heartRate !== undefined) {
-        vitalSignData.value = heartRate;
+        value = heartRate;
       }
       break;
     default:
       return res.status(400).json({ success: false, err: "無效的 typeId" });
   }
 
-  // 儲存 vital sign 資料
+  if (value === null) {
+    return res.status(400).json({ success: false, err: "缺少測量值" });
+  }
+
+  // 使用 MySQL 插入資料
+  const connection = await mysqlConnectionPool.getConnection();
   try {
-    const newVitalSign = await prisma.vitalSign.create({
-      data: {
+    // 插入生理資料
+    const [result] = await connection.execute<ResultSetHeader>(
+      `
+      INSERT INTO vitalsigns (userId, patientId, vitalTypeId, value, recordDateTime, comment, alertTrigged)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+      `,
+      [
         userId,
         patientId,
-        vitalTypeId: typeId, // 對應到 vitalTypeId
-        value: vitalSignData.value, // 根據 typeId 儲存相應的數值
-        recordDateTime: new Date(create_date), // 儲存時間
-        time,
-        comment,
-        alertTrigged: false, // 預設不觸發警報
-      },
-    });
+        typeId,
+        value,
+        create_date, // 傳入的測量時間
+        comment || null, // 備註，如果沒有就傳 null
+        0, // 預設不觸發警報
+      ]
+    );
 
+    // 回傳成功訊息
     return res.status(200).json({
       success: true,
       message: "生理資料創建成功",
-      signId: newVitalSign.signId,
-      alertTriggered: false, // 初始為不觸發警報
+      signId: result.insertId,
+      alertTriggered: false,
     });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "未知的錯誤";
@@ -88,5 +98,7 @@ export const createVitalSign = async (
       success: false,
       err: `內部錯誤: ${errorMessage}`,
     });
+  } finally {
+    connection.release();
   }
 };
