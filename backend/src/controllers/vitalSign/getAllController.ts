@@ -1,5 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import mysqlConnectionPool from "../../lib/mysql"; // 引入 mysql 連接池
 import { NextApiRequest, NextApiResponse } from "next";
+import { ResultSetHeader, RowDataPacket } from "mysql2"; // 引入 ResultSetHeader 和 RowDataPacket 類型
 
 export const getAllVitalSigns = async (
   req: NextApiRequest,
@@ -8,7 +9,9 @@ export const getAllVitalSigns = async (
   if (req.method !== "GET") {
     return res.status(405).json({ success: false, err: "Method Not Allowed" });
   }
-  const userId = parseInt(req.query.userId as string, 10); // 轉換為整數型態
+
+  const userId = parseInt(req.query.userId as string, 10); // 確保 userId 是數字型態
+
   if (isNaN(userId)) {
     return res
       .status(400)
@@ -16,14 +19,25 @@ export const getAllVitalSigns = async (
   }
 
   try {
-    // 查詢該用戶管理的所有生理資料
-    const vitalSigns = await prisma.vitalSign.findMany({
-      where: {
-        userId: userId, // 確保 userId 是字符串型態，符合資料庫的型態
-      },
-    });
+    // 獲取 MySQL 連接
+    const connection = await mysqlConnectionPool.getConnection();
 
-    if (vitalSigns.length === 0) {
+    // 查詢該用戶管理的所有生理資料
+    interface VitalSign {
+      id: number;
+      userId: number;
+      type: string;
+      value: number;
+      timestamp: string;
+    }
+
+    const [vitalSigns] = await connection.execute<RowDataPacket[]>(
+      `SELECT * FROM vitalsigns WHERE userId = ?`,
+      [userId]
+    );
+
+    // 如果沒有找到任何資料，返回 404 錯誤
+    if (Array.isArray(vitalSigns) && vitalSigns.length === 0) {
       return res
         .status(404)
         .json({ success: false, err: "未找到任何生理資料" });
