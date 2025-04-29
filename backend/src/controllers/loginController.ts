@@ -24,7 +24,7 @@ export const login = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(401).json({ success: false, message: '密碼錯誤' });
     }
 
-    // ✅ 可選：寫入 cookie（模擬登入 session，可改用 JWT 或 iron-session）
+    // 寫入 cookie（模擬登入 session，可改用 JWT 或 iron-session）
     res.setHeader('Set-Cookie', `uid=${user.id}; Max-Age=${60 * 60 * 12}; Path=/`);
 
     return res.status(200).json({
