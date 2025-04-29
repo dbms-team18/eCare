@@ -17,8 +17,8 @@ export const readPatient = async (req: NextApiRequest, res: NextApiResponse) => 
     // 查詢病患資料，並確認是該使用者管理的病患
     const patient = await prisma.patient.findFirst({
       where: {
-        id: String(patientId),
-        userId: String(userId),
+        id: Number(patientId),
+        userId: Number(userId),
       },
     });
 
@@ -33,7 +33,7 @@ export const readPatient = async (req: NextApiRequest, res: NextApiResponse) => 
       age: patient.age,
       gender: patient.gender,
       addr: patient.addr,
-      idNum: patient.idNum,
+      idNum: patient.id_number,
       nhCardNum: patient.nhCardNum,
       emerName: patient.emerName,
       emerPhone: patient.emerPhone,
