@@ -1,113 +1,70 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import mysql from 'mysql2/promise';
+import { RowDataPacket } from 'mysql2/promise';
+import { executeQuery, executeModification } from '@/lib/db';
 
-// Create database connection configuration
-const dbConfig = {
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-};
+interface PatientData {
+  userId: number;
+  name: string;
+  age: number;
+  gender: string;
+  addr: string;
+  idNum: string;
+  nhCardNum: string;
+  emerName?: string | null;
+  emerPhone?: string | null;
+  info?: string | null;
+}
 
-// Helper function to create a connection
-const getConnection = async () => {
-  return await mysql.createConnection(dbConfig);
-};
+export const createPatient = async (patientData: PatientData): Promise<number> => {
+  // Validate gender values
+  if (!['female', 'male', 'other'].includes(patientData.gender)) {
+    throw new Error('Gender must be female, male, or other');
+  }
 
-// Create a new patient (caregiver only)
-export const createPatient = async (req: NextApiRequest, res: NextApiResponse) => {
-  //if (req.method !== 'POST') {
-  //  return res.status(405).json({ success: false, err: 'Method Not Allowed' });
-  //}
+  // Check if patient with same ID number already exists
+  const existingPatients = await executeQuery<RowDataPacket[]>(
+    'SELECT * FROM patient WHERE id_number = ?',
+    [patientData.idNum]
+  );
+  
+  if (existingPatients.length > 0) {
+    throw new Error('Patient with this ID number already exists');
+  }
 
-  let connection;
-
+  // Begin transaction using executeModification with transaction
   try {
-    const { 
-      userId,
-      name, 
-      age, 
-      gender, 
-      addr, 
-      idNum, 
-      nhCardNum,
-      emerName,
-      emerPhone,
-      info,
-    } = req.body;
-
-    // Validate required fields 
-    if (!userId || !name || !age || !gender || !addr || !idNum || !nhCardNum) {
-      return res.status(400).json({
-        success: false,
-        message: '缺少必要資料',
-        err: 'Missing required fields'
-      });
-    }
-
-    // Validate gender values
-    if (!['female', 'male', 'other'].includes(gender)) {
-      return res.status(400).json({
-        success: false,
-        message: '性別格式錯誤',
-        err: 'Gender must be female, male, or other'
-      });
-    }
-
-    // Create a connection
-    connection = await getConnection();
-    
-    // Start transaction
-    await connection.beginTransaction();
-
-    // Check if patient with same ID number already exists
-    const [existingPatients] = await connection.execute(
-      'SELECT * FROM patient WHERE id_number = ?',
-      [idNum]
-    );
-    
-    if (Array.isArray(existingPatients) && existingPatients.length > 0) {
-      await connection.rollback();
-      return res.status(409).json({
-        success: false,
-        message: '病患已存在',
-        err: 'Patient with this ID number already exists'
-      });
-    }
-
     // Create new patient
     const currentDate = new Date();
-    const [result] = await connection.execute(
+    const result = await executeModification(
       `INSERT INTO patient 
       (userId, name, age, gender, addr, id_number, nhCardNum, emerName, emerPhone, info, lastUpd, lastUpdId, isArchived) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        Number(userId),
-        name,
-        Number(age),
-        gender,
-        addr,
-        idNum,
-        nhCardNum,
-        emerName || null,
-        emerPhone || null,
-        info || null,
+        patientData.userId,
+        patientData.name,
+        patientData.age,
+        patientData.gender,
+        patientData.addr,
+        patientData.idNum,
+        patientData.nhCardNum,
+        patientData.emerName || null,
+        patientData.emerPhone || null,
+        patientData.info || null,
         currentDate,
-        userId,
+        patientData.userId,
         false
       ]
     );
 
     // Get the inserted patient ID
-    const patientId = (result as mysql.ResultSetHeader).insertId;
+    const patientId = result.insertId;
 
     // Create relationship between user and patient
-    await connection.execute(
+    await executeModification(
       `INSERT INTO tracking 
       (userId, patientId, createdAt, permissionLevel, role, roleId) 
       VALUES (?, ?, ?, ?, ?, ?)`,
       [
-        Number(userId),
+        patientData.userId,
         patientId,
         currentDate,
         1,
@@ -116,30 +73,9 @@ export const createPatient = async (req: NextApiRequest, res: NextApiResponse) =
       ]
     );
 
-    // Commit the transaction
-    await connection.commit();
-
-    return res.status(201).json({
-      success: true,
-      message: '成功新增病患',
-      data: { patientId }
-    });
+    return patientId;
   } catch (error) {
-    // Rollback transaction in case of error
-    if (connection) {
-      await connection.rollback();
-    }
-    
-    console.error('Create patient error:', error);
-    return res.status(500).json({
-      success: false,
-      message: '新增病患失敗',
-      err: error instanceof Error ? error.message : '未知錯誤'
-    }); 
-  } finally {
-    // Close the connection
-    if (connection) {
-      await connection.end();
-    }
+    // Re-throw the error to be handled by the API route
+    throw error;
   }
 };
