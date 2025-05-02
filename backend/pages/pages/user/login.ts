@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { signUp } from '@/controllers/signupController'
+import { login } from '@/controllers/user/loginController'
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') return signUp(req, res)
+  if (req.method === 'POST') return login(req, res)
   return res.status(405).end()
 }

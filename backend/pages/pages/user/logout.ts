@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { logout } from '@/controllers/logoutController'
+import { logout } from '@/controllers/user/logoutController'
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') return logout(req, res)
