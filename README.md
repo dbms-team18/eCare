@@ -56,10 +56,6 @@
 │   │   ├── alert
 │   │   │     ├── create.ts
 │   │   │     ├── getUnread.ts
-│   │   │     └──read.ts
-│   │   ├── alert
-│   │   │     ├── create.ts
-│   │   │     ├── getUnread.ts
 │   │   │     └── read.ts
 │   │   ├── healthTrend
 │   │   │     └── table.ts
