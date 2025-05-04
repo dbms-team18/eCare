@@ -53,7 +53,17 @@
 │   │   │     ├── get.ts
 │   │   │     ├── getAll.ts
 │   │   │     └── update.ts
-│   │   ├──health.ts
+│   │   ├── alert
+│   │   │     ├── create.ts
+│   │   │     ├── getUnread.ts
+│   │   │     └──read.ts
+│   │   ├── alert
+│   │   │     ├── create.ts
+│   │   │     ├── getUnread.ts
+│   │   │     └── read.ts
+│   │   ├── healthTrend
+│   │   │     └── table.ts
+│   │   └──health.ts
 │   ├── favicon.ico
 │   ├── globals.css
 │   ├── layout.tsx
