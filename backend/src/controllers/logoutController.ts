@@ -7,25 +7,19 @@ export const logout = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    // 清除 cookie（模擬 sessionid）
-    res.setHeader('Set-Cookie', 'uid=; Max-Age=0; Path=/');
+    // 清除登入 cookie：uid
+    res.setHeader('Set-Cookie', 'uid=; Max-Age=0; Path=/; HttpOnly');
 
     return res.status(200).json({
-      status: 200,
       success: true,
       message: '登出成功',
     });
-  } catch (err) {
-    if (err instanceof Error) {
-      return res.status(500).json({
-        success: false,
-        message: `內部錯誤: ${err.message}`,
-      });
-    }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : '未知錯誤';
 
     return res.status(500).json({
       success: false,
-      message: '未知錯誤',
+      message: `內部錯誤: ${message}`,
     });
   }
 };
