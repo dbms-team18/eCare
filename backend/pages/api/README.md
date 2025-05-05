@@ -10,7 +10,7 @@ curl -X POST http://localhost:3000/api/login \
 
 ### Test Signup
 ```
-curl -X POST http://localhost:3000/api/signup \
+curl -X POST http://localhost:3000/api/User/signup \
   -H "Content-Type: application/json" \
   -d '{
     "username": "Juliana",
