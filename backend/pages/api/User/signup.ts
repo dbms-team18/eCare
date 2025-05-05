@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next'
 import { createPool } from 'mysql2/promise';
 import bcrypt from 'bcrypt';
 import { validatePassword } from '@/utils/passwordUtils';
@@ -89,3 +89,10 @@ export const signUp = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(500).json({ message: `內部錯誤: ${message}` });
   }
 };
+
+
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'POST') return signUp(req, res)
+  return res.status(405).end()
+}

@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next'
 import { createPool } from 'mysql2/promise';
 import { compare } from 'bcrypt';
 
@@ -65,3 +65,12 @@ export const login = async (req: NextApiRequest, res: NextApiResponse) => {
     });
   }
 };
+
+
+
+
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'POST') return login(req, res)
+  return res.status(405).end()
+}

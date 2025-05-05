@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 export const logout = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
@@ -23,3 +23,9 @@ export const logout = async (req: NextApiRequest, res: NextApiResponse) => {
     });
   }
 };
+
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'POST') return logout(req, res)
+  return res.status(405).end()
+}
