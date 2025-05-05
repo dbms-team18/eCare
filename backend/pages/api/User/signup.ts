@@ -1,9 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import mysqlConnectionPool from "../../../src/lib/mysql"
-import { RowDataPacket } from 'mysql2';
 import bcrypt from 'bcrypt';
 import { validatePassword } from '@/utils/passwordUtils';
+// DB 相關
 import type { ResultSetHeader } from 'mysql2';
+import { RowDataPacket } from 'mysql2';
+import mysqlConnectionPool from "../../../src/lib/mysql"
 
 
 // 定義 user 資料型別
