@@ -48,14 +48,21 @@ curl -X POST http://localhost:3000/api/alert/createAlert \
   -H "Content-Type: application/json" \
   -d '{
     "userID": 1,
-    "patientId": "1",
-    "vitalTypeId": "1"
+    "patientID": "1",
+    "vitalTypeID": "1"
   }'
 ```
 
 ### Test getUnreadAlert
 ```
-curl -X POST http://localhost:3000/api/alert/getUnread
+curl -X POST http://localhost:3000/api/alert/getUnread \
+  -H "Content-Type: application/json" \
+  -d '{
+    "patientID": 1,
+    "userID": 1,
+    "signID": 1
+  }'
+
 ```
 
 ### Test Resd Alert 

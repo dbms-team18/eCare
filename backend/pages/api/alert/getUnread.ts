@@ -19,12 +19,15 @@ interface AlertRow extends RowDataPacket{
   export const getUnread = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method !== 'POST') return res.status(405).end();
     
+    // request 要輸入的參數
+    const {patientID, userID, signID} =req.body;
     try {
       const connection = await mysqlConnectionPool.getConnection();
       try {
         // 撈出所有未讀的 alert 
         const [alertRows] = await connection.execute<AlertRow[]>(
-          `SELECT * FROM alert WHERE alertTrigger = 1`
+          `SELECT * FROM alert WHERE alertTrigger = 1 AND patientId = ? AND userId = ? AND signId = ?`,
+          [patientID, userID, signID]
         );
         const allAlertData = alertRows.map((alert) => ({
             alertID: alert.alertId,
@@ -33,14 +36,22 @@ interface AlertRow extends RowDataPacket{
             alertInfo: alert.alertMessage,
             timestamp: alert.alertTime
           }));
-    
-          return res.status(200).json({
-            success: true,
-            message: "成功取得未讀警報",
-            err: null,
-            allAlertData
-          });
-        
+          if (allAlertData.length > 0){
+            return res.status(200).json({
+              success: true,
+              message: "成功取得未讀警報",
+              err: null,
+              allAlertData
+            });
+          }else{
+            return res.status(200).json({
+              success: true,
+              message: "無未讀警報",
+              err: null,
+              allAlertData: []
+            });
+          }
+  
         }finally {
             connection.release();
           }
