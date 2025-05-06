@@ -1,7 +1,23 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { createPool } from 'mysql2/promise';
+// NextJS 相關
+import type { NextApiRequest, NextApiResponse } from 'next'
+
+// login 相關
 import { compare } from 'bcrypt';
 
+// DB 相關
+import { RowDataPacket } from 'mysql2';
+import mysqlConnectionPool from "../../../src/lib/mysql"
+
+
+// 定義 user 資料型別， RowDataPacket 是 mysql2 的資料型別，方便使用
+interface UserRow extends RowDataPacket{
+  userId: number;
+  username: string;
+  password: string;
+  email: string;
+  role: number;
+  created_at: string;
+}
 
 export const login = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') return res.status(405).end();
@@ -9,18 +25,16 @@ export const login = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { username, password } = req.body;
 
+    // 欄位不可空
     if (!username || !password) {
       return res.status(400).json({ success: false, message: '請輸入帳號或密碼' });
     }
 
-    const connection = await pool.getConnection();
+    // 連結 DB 比對
+    const connection = await mysqlConnectionPool.getConnection();
     try {
       // 查詢用戶
-      const [rows] = await connection.execute<[{ 
-        userId: number, 
-        username: string,
-        password: string, 
-        role: number }]>(
+      const [rows] = await connection.execute<UserRow[]>(
         'SELECT userId, username, password, role FROM user WHERE username = ?',
         [username]
       );
@@ -28,7 +42,7 @@ export const login = async (req: NextApiRequest, res: NextApiResponse) => {
       // 創建矩陣存資料
       const user = rows[0];
 
-      // 無此帳號
+      // 無此用戶帳號
       if (!user) {
         return res.status(400).json({ success: false, message: '用戶不存在' });
       }
@@ -65,3 +79,11 @@ export const login = async (req: NextApiRequest, res: NextApiResponse) => {
     });
   }
 };
+
+
+
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'POST') return login(req, res)
+  return res.status(405).end()
+}

@@ -1,21 +1,14 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { createPool } from 'mysql2/promise';
+import type { NextApiRequest, NextApiResponse } from 'next'
 import bcrypt from 'bcrypt';
 import { validatePassword } from '@/utils/passwordUtils';
+// DB 相關
+import type { ResultSetHeader } from 'mysql2';
+import { RowDataPacket } from 'mysql2';
+import mysqlConnectionPool from "../../../src/lib/mysql"
 
-// 連線池 (建議正式版抽出去 lib/mysql.ts)
-const pool = createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'your_password', // <-- 換成你的密碼
-  database: 'vitalsigns',    // <-- 換成你的資料庫
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
 
 // 定義 user 資料型別
-interface UserRow {
+interface UserRow extends RowDataPacket{
   userId: number;
   username: string;
   password: string;
@@ -39,7 +32,7 @@ export const signUp = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    const connection = await pool.getConnection();
+    const connection = await mysqlConnectionPool.getConnection();
     try {
       // 檢查 email 是否存在
       const [emailRows] = await connection.execute<UserRow[]>(
@@ -49,6 +42,7 @@ export const signUp = async (req: NextApiRequest, res: NextApiResponse) => {
       if (emailRows.length > 0) {
         return res.status(400).json({ message: '電子郵件已存在' });
       }
+
 
       // 檢查 username 是否存在
       const [nameRows] = await connection.execute<UserRow[]>(
@@ -63,21 +57,19 @@ export const signUp = async (req: NextApiRequest, res: NextApiResponse) => {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // 新增使用者
-      const [result] = await connection.execute<{
-        insertId: number;
-      }>(
+      const [result] = await connection.execute<ResultSetHeader>(
         `INSERT INTO user (username, email, password, role, created_at)
          VALUES (?, ?, ?, ?, NOW())`,
         [username, email, hashedPassword, 0]
       );
 
-      const insertId = (result as any).insertId;
+      const insertId = result.insertId;
 
       return res.status(200).json({
         profile: {
           uid: insertId,
-          email,
-          username,
+          email:email,
+          username:username,
           date: new Date().toISOString(), // 這邊可以再進一步 select created_at
         },
       });
@@ -89,3 +81,10 @@ export const signUp = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(500).json({ message: `內部錯誤: ${message}` });
   }
 };
+
+
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'POST') return signUp(req, res)
+  return res.status(405).end()
+}
