@@ -47,16 +47,10 @@ curl -X POST http://localhost:3000/api/patient/create \
 curl -X POST http://localhost:3000/api/alert/createAlert \
   -H "Content-Type: application/json" \
   -d '{
-    "signID": 1,
-    "userId": 101,
-    "patientId": "P123",
-    "vitalTypeId": "VT001",
-    "typeName": "Heart Rate",
-    "value": 120.5,
-    "recordDateTime": "2025-05-06T13:30:00Z",
-    "alertTrigged": true
+    "userID": 1,
+    "patientId": "1",
+    "vitalTypeId": "1"
   }'
-
 ```
 
 ### Test getUnreadAlert
