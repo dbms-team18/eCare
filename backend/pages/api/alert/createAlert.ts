@@ -24,6 +24,7 @@ interface VitalRow extends RowDataPacket{
     if (req.method !== 'POST') return res.status(405).end();
     
     try {
+      const userID = req.body;
       const connection = await mysqlConnectionPool.getConnection();
       try {
         // 撈出所有觸發 alert 的 vital sign
