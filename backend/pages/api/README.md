@@ -63,3 +63,10 @@ curl -X POST http://localhost:3000/api/alert/createAlert \
 ```
 curl -X POST http://localhost:3000/api/alert/getUnread
 ```
+
+### Test Resd Alert 
+```
+curl -X POST http://localhost:3000/api/alert/readAlert \
+  -H "Content-Type: application/json" \
+  -d '{ "alertId": 22 }'
+```

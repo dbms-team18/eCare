@@ -28,7 +28,7 @@ interface AlertRow extends RowDataPacket{
         );
         const allAlertData = alertRows.map((alert) => ({
             alertID: alert.alertId,
-            alertTrigged: alert.alertTrigger, // 注意拼字
+            alertTrigger: alert.alertTrigger, // 注意拼字
             patientId: alert.patientId,
             alertInfo: alert.alertMessage,
             timestamp: alert.alertTime
