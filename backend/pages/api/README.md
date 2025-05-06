@@ -69,5 +69,9 @@ curl -X POST http://localhost:3000/api/alert/getUnread \
 ```
 curl -X POST http://localhost:3000/api/alert/readAlert \
   -H "Content-Type: application/json" \
-  -d '{ "alertId": 22 }'
+  -d '{
+    "userID": 1,
+    "signID": 1
+  }'
+
 ```
