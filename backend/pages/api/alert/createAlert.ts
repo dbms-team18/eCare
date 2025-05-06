@@ -20,7 +20,7 @@ interface VitalRow extends RowDataPacket{
   }
 
 
-  export const creatAlert = async (req: NextApiRequest, res: NextApiResponse) => {
+  export const createAlert = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method !== 'POST') return res.status(405).end();
     
     try {
@@ -80,6 +80,6 @@ interface VitalRow extends RowDataPacket{
 
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') return creatAlert(req, res)
+  if (req.method === 'POST') return createAlert(req, res)
   return res.status(405).end()
 }

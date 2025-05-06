@@ -58,3 +58,8 @@ curl -X POST http://localhost:3000/api/alert/createAlert \
   }'
 
 ```
+
+### Test getUnreadAlert
+```
+curl -X POST http://localhost:3000/api/alert/getUnread
+```
