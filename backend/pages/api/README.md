@@ -24,3 +24,20 @@ curl -X POST http://localhost:3000/api/User/logout \
   -b cookie.txt \
   -c cookie.txt
 ```
+
+### Test Create Patient
+```
+curl -X POST http://localhost:3000/api/patient/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "林素芬",
+    "age": "88",
+    "gender": "female",
+    "addr":"台北市中山區C路1號",
+    "idNum":"Y222948393",
+    "nhCardNum":"NH0003",
+    "emerName":"李阿慧", 
+    "emerPhone":"0987678594",
+    "info":"癲癇"
+  }'
+```
