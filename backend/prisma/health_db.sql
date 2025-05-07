@@ -11,6 +11,7 @@ DROP TABLE IF EXISTS `alert`;
 CREATE TABLE `alert` (
   `alertId` int NOT NULL AUTO_INCREMENT,
   `patientId` int NOT NULL,
+  `userId` int NOT NULL,
   `signId` int NOT NULL,
   `alertType` varchar(50) NOT NULL,
   `alertMessage` varchar(255) NOT NULL,
@@ -26,6 +27,7 @@ CREATE TABLE `alert` (
 DROP TABLE IF EXISTS `patient`;
 CREATE TABLE `patient` (
   `patientId` int NOT NULL AUTO_INCREMENT,
+  `userId` int DEFAULT NOT NULL,
   `name` varchar(100) NOT NULL,
   `age` int NOT NULL,
   `gender` varchar(10) NOT NULL,

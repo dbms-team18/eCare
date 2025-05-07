@@ -1,7 +1,8 @@
-import { prisma } from "@/lib/prisma";
+import mysqlConnectionPool from "../../../src/lib/mysql";
 import { NextApiRequest, NextApiResponse } from "next";
+import { RowDataPacket } from "mysql2";
 
-export const getVitalSign = async (
+const getVitalSign = async (
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> => {
@@ -10,10 +11,12 @@ export const getVitalSign = async (
     method,
   } = req;
 
+  // 只允許 GET 請求
   if (method !== "GET") {
     return res.status(405).json({ success: false, err: "Method Not Allowed" });
   }
 
+  // 確認傳入的 signId 參數有效
   if (!signId || Array.isArray(signId)) {
     return res
       .status(400)
@@ -28,23 +31,39 @@ export const getVitalSign = async (
       .json({ success: false, err: "signId 必須是有效的數字" });
   }
 
+  // 獲取 MySQL 連接
+  const connection = await mysqlConnectionPool.getConnection();
+
   try {
     // 查詢單一生理資料
-    const vitalSign = await prisma.vitalSign.findUnique({
-      where: {
-        signId: parsedSignId, // 使用正確的 signId 進行查詢
-      },
-    });
+    interface VitalSign {
+      signId: number;
+      [key: string]: string | number | null; // Adjust fields based on your database schema
+    }
 
-    if (!vitalSign) {
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      `SELECT * FROM vitalsigns WHERE signId = ?`,
+      [parsedSignId]
+    );
+
+    const vitalSign = rows as unknown as VitalSign[];
+
+    if (!vitalSign || vitalSign.length === 0) {
       return res.status(404).json({ success: false, err: "未找到生理資料" });
     }
 
-    return res.status(200).json({ success: true, vitalSign });
+    return res
+      .status(200)
+      .json({ success: true, vitalSign: (vitalSign as any)[0] });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "未知錯誤";
     return res
       .status(500)
       .json({ success: false, err: `內部錯誤: ${errorMessage}` });
+  } finally {
+    // 釋放連接回連接池
+    connection.release();
   }
 };
+
+export default getVitalSign;
