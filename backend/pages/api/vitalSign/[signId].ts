@@ -1,8 +1,8 @@
-import mysqlConnectionPool from "../../lib/mysql"; // 引入 mysql 連接池
+import mysqlConnectionPool from "../../../src/lib/mysql";
 import { NextApiRequest, NextApiResponse } from "next";
-import { ResultSetHeader, RowDataPacket } from "mysql2"; // 引入 ResultSetHeader 和 RowDataPacket 類型
+import { RowDataPacket } from "mysql2";
 
-export const getVitalSign = async (
+const getVitalSign = async (
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> => {
@@ -31,10 +31,10 @@ export const getVitalSign = async (
       .json({ success: false, err: "signId 必須是有效的數字" });
   }
 
-  try {
-    // 獲取 MySQL 連接
-    const connection = await mysqlConnectionPool.getConnection();
+  // 獲取 MySQL 連接
+  const connection = await mysqlConnectionPool.getConnection();
 
+  try {
     // 查詢單一生理資料
     interface VitalSign {
       signId: number;
@@ -52,7 +52,6 @@ export const getVitalSign = async (
       return res.status(404).json({ success: false, err: "未找到生理資料" });
     }
 
-    // 返回找到的生理資料
     return res
       .status(200)
       .json({ success: true, vitalSign: (vitalSign as any)[0] });
@@ -61,5 +60,10 @@ export const getVitalSign = async (
     return res
       .status(500)
       .json({ success: false, err: `內部錯誤: ${errorMessage}` });
+  } finally {
+    // 釋放連接回連接池
+    connection.release();
   }
 };
+
+export default getVitalSign;
