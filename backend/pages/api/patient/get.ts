@@ -24,7 +24,7 @@ export const getPatient = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(405).json({ success: false, message: 'Method Not Allowed' });
   }
 
-  const { patientId } = req.query;
+  const { userId, patientId } = req.query;
   
   // 檢查是否傳入 patientId
   if (!patientId) {
@@ -53,15 +53,15 @@ export const getPatient = async (req: NextApiRequest, res: NextApiResponse) => {
           lastUpdId, 
           userId 
         FROM patient 
-        WHERE patientId = ?`,
-        [Number(patientId)]
+        WHERE patientId = ? AND userId = ?`,
+        [Number(patientId), Number(userId)]
       );
       
       // Check if patient exists
       if (!patients || patients.length === 0) {
         return res.status(404).json({ 
           success: false, 
-          message: '病患資料未找到' 
+          message: '無權限或病患資料不存在' 
         });
       }
       
