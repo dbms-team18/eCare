@@ -33,30 +33,56 @@
 │   ├── .env.local               # NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
 │   ├── next.config.js
 │   └── package.json
-│
-└── backend/
-    ├── src/
-    │   ├── controllers/
-    │   │   ├── patientController.ts
-    │   │   ├── vitalController.ts
-    │   │   └── alertController.ts
-    │   ├── routes/
-    │   │   ├── patientRoutes.ts
-    │   │   ├── vitalRoutes.ts
-    │   │   └── alertRoutes.ts
-    │   ├── models/
-    │   │   └── patientModel.ts  # 使用 ORM 如 Prisma 或 Sequelize
-    │   ├── middlewares/
-    │   │   └── auth.ts          # 驗證處理
-    │   ├── utils/
-    │   │   └── db.ts            # MySQL 連線
-    │   └── index.ts             # 主伺服器入口
-    ├── prisma/                  # 如果你使用 Prisma ORM
-    │   └── schema.prisma
-    ├── .env                     # DB_URL、JWT_SECRET 等
-    ├── tsconfig.json
-    └── package.json
-
+├── app/
+│   ├── pages/api
+│   │   ├── user
+│   │   │     ├── signup.ts
+│   │   │     ├── logout.ts
+│   │   │     ├── login.ts
+│   │   │     └── getinfo.ts
+│   │   ├── patient
+│   │   │     ├── create.ts
+│   │   │     ├── delete.ts
+│   │   │     ├── get.ts
+│   │   │     ├── getAll.ts
+│   │   │     ├── read.ts
+│   │   │     └── update.ts
+│   │   ├── vitalSign
+│   │   │     ├── create.ts
+│   │   │     ├── delete.ts
+│   │   │     ├── get.ts
+│   │   │     ├── getAll.ts
+│   │   │     └── update.ts
+│   │   ├── alert
+│   │   │     ├── create.ts
+│   │   │     ├── getUnread.ts
+│   │   │     └── read.ts
+│   │   ├── healthTrend
+│   │   │     └── table.ts
+│   │   └──health.ts
+│   ├── favicon.ico
+│   ├── globals.css
+│   ├── layout.tsx
+│   ├── lib
+│   │   └──health_db.sql
+│   │   └──db.ts, etc
+│   ├── page.tsx
+│   └── signup
+│       └── page.tsx
+├── bun.lock
+├── eslint.config.mjs
+├── next-env.d.ts
+├── next.config.ts
+├── package.json
+├── postcss.config.mjs
+├── public
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── README.md
+└── tsconfig.json
 ```
 ---
 
@@ -125,4 +151,32 @@ export default function handler(req, res) {
   // res: response 物件（http.ServerResponse）
 }
 
+```
+
+### pkg to install
+
+npm
+```
+install npm
+```
+@prisma/client
+```
+npm install @prisma/client
+```
+bcrypt
+```
+npm i --save-dev @types/bcrypt
+```
+ts-node
+```
+npm install --save-dev ts-node typescript
+```
+express
+```
+npm install --save-dev @types/express
+```
+
+mySQL2
+```
+npm install mysql2
 ```
