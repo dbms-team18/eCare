@@ -14,14 +14,15 @@
 .
 ├── frontend/
 │   ├── app/
-│   │   ├── layout.tsx
-│   │   ├── page.tsx
-│   │   ├── login/
+│   │   ├── user/
+            ├── login/page.tsx
+            ├── singup/page.tsx
+│   │   ├── page.tsx 
 │   │   ├── dashboard/
 │   │   └── alerts/
 │   ├── components/
-│   │   ├── PatientCard.tsx
-│   │   └── VitalChart.tsx
+│   │   ├── LoginRegisterCard.tsx
+│   │   └── Button.tsx
 │   ├── lib/
 │   │   └── api.ts               # 封裝呼叫 backend API 的函式
 │   ├── types/
