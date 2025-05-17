@@ -1,50 +1,58 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation'; // 使用 useRouter 來處理路由
+import { useRouter } from 'next/navigation';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import PatientInfo from '../../components/dashboard/PatientInfo';
 import VitalSignsGrid from '../../components/dashboard/VitalSignsGrid';
-import { VitalSign } from '../../components/dashboard/VitalSignCard';
+import { VitalSignRecord } from '@/types/api';
+import { idToCategory,unitMap, iconMap} from '@/constants/vitalSignMap';
 
 export default function Dashboard() {
   const router = useRouter();
 
   const patientData = {
-    name: '王小明',
-    message: '繼續保持！',
-    vitalSigns: [
-      { id: 'heart-rate', name: '心跳', value: 90, unit: 'bpm', status: '正常', icon: '❤️' },
-      { id: 'blood-oxygen', name: '血氧', value: 99, unit: '%SpO2', status: '正常', icon: '🔴' },
-      { id: 'blood-pressure', name: '血壓', value: { systolic: 100, diastolic: 80 }, unit: 'mmHg', status: '正常', icon: '💧' },
-      { id: 'weight', name: '體重', value: 80, unit: 'kg', status: '正常', icon: '👣' },
-      { id: 'blood-sugar', name: '血糖', value: 90, unit: 'mg/dL', status: '正常', icon: '📊' },
-    ] as VitalSign[],
-  };
+  name: '王小明',
+  message: '繼續保持！',
+  vitalSigns: [
+    { signID: '1', vitalTypeId: 1, value: 90, status: '正常' },
+    { signID: '4', vitalTypeId: 4, value: 80, status: '正常' },
+    { signID: '2', vitalTypeId: 2, value: 99, status: '正常' },
+    { signID: '3', vitalTypeId: 3, value: 100, status: '正常' },
+    { signID: '5', vitalTypeId: 5, value: 80, status: '正常' },
+    { signID: '6', vitalTypeId: 6, value: 90, status: '正常' },
+  ] as Array<{ signID: string; vitalTypeId: number; value: number; status: string }>,
+};
 
-  const handleAddRecord = (vitalSignId: string) => {
-    // 跳轉到 /vitalsigns 並帶上類別資訊
-    router.push(`/vitalsigns?category=${vitalSignId}`);
+  const handleAddRecord = (id: string) => {
+    const vitalTypeId = Number(id);
+    router.push(`/vitalsigns?category=${vitalTypeId}`);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-green-100 to-yellow-100 p-4">
       <div className="max-w-6xl mx-auto bg-white rounded-3xl p-8 shadow-md">
-        <DashboardHeader isCaregiver={true} patientName={patientData.name} />
+        <DashboardHeader isCaregiver={1} patientName={patientData.name} />
         <div className="grid grid-cols-12 gap-6">
           <PatientInfo
             message={patientData.message}
             alertTriggered={patientData.vitalSigns.some(
               (vitalSign) =>
-                (vitalSign.id === 'blood-pressure' &&
-                  typeof vitalSign.value === 'object' &&
-                  (vitalSign.value as { systolic: number; diastolic: number }).systolic > 120) ||
-                (vitalSign.id === 'blood-oxygen' &&
-                  typeof vitalSign.value === 'number' &&
-                  vitalSign.value < 92)
+                (vitalSign.vitalTypeId === 2 && vitalSign.value > 120) || // 收縮壓
+                (vitalSign.vitalTypeId === 5 && vitalSign.value < 92)     // 血氧
             )}
           />
-          <VitalSignsGrid vitalSigns={patientData.vitalSigns} onAddRecord={handleAddRecord} />
+          <VitalSignsGrid
+            vitalSigns={patientData.vitalSigns.map((vitalSign) => ({
+              id: vitalSign.signID,
+              name: idToCategory[String(vitalSign.vitalTypeId)],
+              value: vitalSign.value,
+              unit: unitMap[vitalSign.vitalTypeId],
+              status: vitalSign.status,
+              icon: iconMap?.[vitalSign.vitalTypeId] ?? '',
+            }))}
+            onAddRecord={handleAddRecord}
+          />
         </div>
       </div>
     </div>

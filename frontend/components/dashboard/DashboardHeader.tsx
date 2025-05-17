@@ -4,27 +4,33 @@ import React from 'react';
 import { useRouter } from 'next/navigation'; // 使用 Next.js 的 useRouter 來處理路由
 
 type DashboardHeaderProps = {
-  isCaregiver: boolean;
+  isCaregiver: number;
   patientName: string;
+  alertTriggered?: boolean;
 };
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({ isCaregiver, patientName }) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ isCaregiver, patientName, alertTriggered }) => {
   const router = useRouter();
 
-  const handleHomeClick = () => {
-    router.push('/dashboard'); // 刷新頁面
-  };
 
   const handleAlertClick = () => {
     router.push('/alert'); // 跳轉到 Alert 頁面
   };
 
   const handleVitalSignsClick = () => {
-    router.push('/vitalsigns'); // 跳轉到 Trend 頁面
+    router.push('/vitalsigns'); // 跳轉到 Vitalsigns 頁面
   };
 
   const handleTrendClick = () => {
     router.push('/trend'); // 跳轉到 Trend 頁面
+  };
+
+  const handlePersonaClick = () => {
+    router.push('/user/caregiver'); // 跳轉到 Caregiver 頁面
+  };
+
+  const handleHomeClick = () => {
+    router.push('/dashboard'); // 刷新頁面
   };
 
   return (
@@ -45,7 +51,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ isCaregiver, patientN
           <li>
             <button className="group" onClick={handleAlertClick}>
               <img
-                src="/bell.svg"
+                src={alertTriggered ? "/bell-alert.svg" : "/bell.svg"}
                 alt="Bell Icon"
                 className="w-10 h-10 group-hover:scale-110 transition-transform duration-200"
               />
@@ -76,7 +82,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ isCaregiver, patientN
 
           {/* 個人頁面圖標 */}
           <li>
-            <button className="group">
+            <button className="group"
+            onClick={handlePersonaClick}
+            >
               <img
                 src="/profile.svg"
                 alt="Profile Icon"
