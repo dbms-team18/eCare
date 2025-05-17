@@ -24,7 +24,7 @@ const VitalSignCard: React.FC<VitalSignCardProps> = ({
   onAddRecord,
 }) => {
   // 模擬 isCaregiver 函數
-  const isCaregiver = () => true; // 假設為照顧者
+  const isCaregiver = () => 1; // 假設為照顧者
   
   // 處理加號按鈕點擊
   const handleAddClick = () => {
