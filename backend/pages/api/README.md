@@ -2,9 +2,10 @@
 
 ### Test Login
 ```
-curl -X POST http://localhost:3000/api/User/login \
+curl -X POST http://localhost:3001/api/User/login \
   -H "Content-Type: application/json" \
-  -d '{"username": "Juliana", "password": "12345678abc"}'
+  -d '{"username": "Juliana", "password": "12345678abc",
+  "role":0}'
 ```
 
 ### Test Signup

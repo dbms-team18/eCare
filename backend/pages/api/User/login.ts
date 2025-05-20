@@ -23,12 +23,15 @@ export const login = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') return res.status(405).end();
 
   try {
-    const { username, password } = req.body;
+    const { username, password, role } = req.body;
 
     // 欄位不可空
     if (!username || !password) {
       return res.status(400).json({ success: false, message: '請輸入帳號或密碼' });
     }
+    if (role === undefined || role === null) {
+      return res.status(400).json({ success: false, message: '請選擇身份別' });
+}
 
     // 連結 DB 比對
     const connection = await mysqlConnectionPool.getConnection();
@@ -39,7 +42,7 @@ export const login = async (req: NextApiRequest, res: NextApiResponse) => {
         [username]
       );
       
-      // 創建矩陣存資料
+      // 創建矩陣存 DB 資料
       const user = rows[0];
 
       // 無此用戶帳號
@@ -53,14 +56,28 @@ export const login = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(401).json({ success: false, message: '密碼錯誤' });
       }
 
+      // 身份不符
+      const numericRole = parseInt(role, 10); // 明確轉為 number
+      if (numericRole !== user.role) {
+        console.log(numericRole+ '!=='+ user.role)
+        return res.status(401).json({ 
+          success: false, 
+          message: `身份不符` });
+}
+
+
       // 登入成功，寫 cookie
-      res.setHeader('Set-Cookie', `uid=${user.userId}; Max-Age=${60 * 60 * 12}; Path=/`);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000'); // 前端 
+
+      res.setHeader('Set-Cookie', `uid=${user.userId}; Max-Age=43200; Path=/; HttpOnly; SameSite=Lax`);
+
 
       return res.status(200).json({
         success: true,
         message: '登入成功',
         uid: user.userId,
-        role: user.role === 0, // true = caregiver
+        role: user.role, // true = caregiver
       });
 
     } finally {
@@ -83,7 +100,18 @@ export const login = async (req: NextApiRequest, res: NextApiResponse) => {
 
 
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') return login(req, res)
-  return res.status(405).end()
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(200).end();
+  }
+
+  if (req.method === 'POST') return login(req, res);
+
+  return res.status(405).end();
 }
+
