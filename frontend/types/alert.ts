@@ -4,7 +4,6 @@ export type Alert = {
   userId: number;
   patientId: string;
   vitalTypeId: number;
-  alertInfo?: number;
+  alertInfo?: string;
   timestamp?: number; 
-  message: string;
 };

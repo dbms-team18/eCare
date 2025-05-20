@@ -13,9 +13,8 @@ const initialAlertRecords: Alert[] = [
     userId: 1,
     patientId: '1',
     vitalTypeId: 2,
-    alertInfo: 72, //怪怪的，總之先寫了vitalSigns的數值
-    timestamp: 202505011030,
-    message: '收縮壓過低',
+    alertInfo:  '收縮壓過低', 
+    timestamp: 202505021515,
   },
   {
     alertID: '2',
@@ -23,9 +22,8 @@ const initialAlertRecords: Alert[] = [
     userId: 1,
     patientId: '1',
     vitalTypeId: 1,
-    alertInfo: 180,
+    alertInfo: '血糖過高',
     timestamp: 202505021415,
-    message: '血糖過高',
   },
   {
     alertID: '3',
@@ -33,9 +31,8 @@ const initialAlertRecords: Alert[] = [
     userId: 1,
     patientId: '1',
     vitalTypeId: 5,
-    alertInfo: 88,
+    alertInfo: '血氧過低',
     timestamp: 202505030945,
-    message: '血氧過低',
   },
 ];
 
@@ -77,13 +74,10 @@ const AlertPage: React.FC = () => {
                 <p className="text-lg font-medium text-red-600">
                   {typeof record.vitalTypeId === 'number' && typeof record.alertInfo === 'number'
                     ? getAlertMessage(record.vitalTypeId, record.alertInfo)
-                    : '異常警示'}
+                    : `${idToCategory[String(record.vitalTypeId)]}：${record.alertInfo}` }
                 </p>
                 <p className="text-sm text-gray-500">
                   {record.timestamp !== undefined ? formatTimestamp(record.timestamp) : '未知時間'}
-                </p>
-                <p className="text-sm text-gray-700">
-                  {idToCategory[String(record.vitalTypeId)]}：{record.alertInfo} {unitMap[record.vitalTypeId]}
                 </p>
               </div>
               <button
