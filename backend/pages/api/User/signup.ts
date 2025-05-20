@@ -20,9 +20,13 @@ interface UserRow extends RowDataPacket{
 export const signUp = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { email, username, password } = req.body;
+  // 接收前端傳來的註冊資料
+  const { username, password, email, role} = req.body;
 
-  if (!email || !username || !password) {
+  // role 轉為 int
+  const numericRole = parseInt(role, 10);
+
+  if (!email || !username || !password || isNaN(numericRole)) {
     return res.status(400).json({ message: '缺少必填字段' });
   }
 
@@ -60,7 +64,7 @@ export const signUp = async (req: NextApiRequest, res: NextApiResponse) => {
       const [result] = await connection.execute<ResultSetHeader>(
         `INSERT INTO user (username, email, password, role, created_at)
          VALUES (?, ?, ?, ?, NOW())`,
-        [username, email, hashedPassword, 0]
+        [username, email, hashedPassword, numericRole]
       );
 
       const insertId = result.insertId;
@@ -84,7 +88,21 @@ export const signUp = async (req: NextApiRequest, res: NextApiResponse) => {
 
 
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') return signUp(req, res)
-  return res.status(405).end()
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // 設定允許跨域來源 :3000
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000'); // ⬅️ 允許前端來自哪個網址
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+
+  // 如果是預檢請求（由瀏覽器自動發出）
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // 處理實際 POST 請求
+  if (req.method === 'POST') return signUp(req, res);
+
+  return res.status(405).end();
 }
+
