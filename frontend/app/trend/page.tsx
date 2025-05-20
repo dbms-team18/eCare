@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import DashboardHeader from '../../components/dashboard/DashboardHeader'; // 引入 DashboardHeader
 
 const TrendPage: React.FC = () => {
-  const isCaregiver = true; // 假設為照顧者
+  const isCaregiver = 1; // 假設為照顧者
   const patientName = '王小明'; // 假設的病患名稱
 
   // 控制 Pop-up 的狀態
