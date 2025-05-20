@@ -76,3 +76,9 @@ curl -X POST http://localhost:3000/api/alert/readAlert \
   }'
 
 ```
+
+### Test Dashboard
+```
+curl -X GET "http://localhost:3001/api/dashboard/getTopVitalSigns?userId=1&patientId=1" \
+  -H "Content-Type: application/json"
+```
