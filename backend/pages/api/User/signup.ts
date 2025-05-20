@@ -26,6 +26,7 @@ export const signUp = async (req: NextApiRequest, res: NextApiResponse) => {
   // role 轉為 int
   const numericRole = parseInt(role, 10);
 
+  //檢測必填字段
   if (!email || !username || !password || isNaN(numericRole)) {
     return res.status(400).json({ message: '缺少必填字段' });
   }
@@ -89,9 +90,9 @@ export const signUp = async (req: NextApiRequest, res: NextApiResponse) => {
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // 設定允許跨域來源 :3000
+  // 設定允許跨域來源 前端 :3000
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000'); // ⬅️ 允許前端來自哪個網址
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000'); 
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
 
