@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 // app/user/profile/page.tsx
 import Button from '../../../components/Button'
@@ -138,31 +138,30 @@ export default function ProfilePage() {
                       身分證：{p.idNum.slice(-4)}｜年齡：{p.age}
                     </div>
                   </div>
-                </label>
-              ))}
-            </div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    身分證：{p.idNumber.slice(-4)}｜年齡：{p.age}
+                  </div>
+                </div>
+              </label>
+            ))}
+          </div>
 
-            {/* 功能按鈕 */}
-            <div className="flex flex-col items-center space-y-3">
+          {/* 功能按鈕 */}
+          <div className="flex flex-col items-center space-y-3">
             <Button
-                label="新增病患"
-                icon={BiPlus}
-                className="w-full"
-                onClick={() => router.push('/patient/add')}
-              />
-              <Button
-                label="確認切換"
-                
-                className="w-full"
-                onClick={handleSubmit}
-              />
-              
-            </div>
+              label="新增病患"
+              icon={BiPlus}
+              className="w-full"
+              onClick={() => router.push("/patient/add")}
+            />
+            <Button
+              label="確認切換"
+              className="w-full"
+              onClick={handleSubmit}
+            />
           </div>
         </div>
-
-          </div>
-      
-    )
-  }
-  
+      </div>
+    </div>
+  );
+}
