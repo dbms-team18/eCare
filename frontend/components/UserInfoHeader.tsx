@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { BiUserCircle } from 'react-icons/bi'
+import { BiUserCircle, BiLogOut  } from 'react-icons/bi'
+import { useRouter } from 'next/navigation'
 
 export default function UserInfoHeader() {
   const [showPopup, setShowPopup] = useState(false)
+  const router = useRouter()
 
   const user = {
     username: '123',
@@ -12,11 +14,17 @@ export default function UserInfoHeader() {
     role: '照顧者',
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('userId')
+    localStorage.removeItem('currentPatient')
+    router.push('/') // 根據你的專案登入頁路徑調整
+  }
+
   return (
     <div className="w-full bg-white shadow-sm px-6 py-3 flex justify-between items-center">
       <h1 className="text-xl font-semibold text-gray-800">eCare連心長照系統</h1>
 
-      <div className="relative">
+      <div className="flex items-center gap-3 relative">
         <div
           onClick={() => setShowPopup(!showPopup)}
           className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-3 py-1 rounded-lg transition"
@@ -24,6 +32,14 @@ export default function UserInfoHeader() {
           <BiUserCircle className="text-3xl text-gray-700" />
           <span className="text-gray-800 font-medium">{user.username}</span>
         </div>
+
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-1 bg-gray-100 text-gray-700 px-3 py-1 rounded-lg text-sm hover:bg-gray-200 transition"
+        >
+          <BiLogOut className="text-lg" />
+          登出
+        </button>
 
         {showPopup && (
           <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-md p-4 text-sm text-gray-700 z-50">

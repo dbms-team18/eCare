@@ -11,6 +11,7 @@
   "dependencies": {
     "@prisma/client": "^6.6.0",
     "axios": "^1.9.0",
+    "backend": "file:",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
@@ -25,13 +26,14 @@
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.1",
     "@types/mysql": "^2.15.27",
-    "@types/node": "^20.17.32",
+    "@types/node": "^20.17.47",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3"
   }

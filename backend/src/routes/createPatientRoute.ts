@@ -1,3 +1,3 @@
-import { createPatient } from '@/src/patients/controllers/createPatient';
+import { createPatient } from '@/controllers/createPatientController';
 
 export default createPatient;

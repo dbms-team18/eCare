@@ -5,13 +5,15 @@
         "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
     },
     "devDependencies": {
-        "concurrently": "^8.0.1"
+        "concurrently": "^8.0.1",
+        "ts-node": "^10.9.2",
+        "tsconfig-paths": "^4.2.0",
+        "typescript": "^5.8.3"
     },
     "dependencies": {
-        "@types/axios": "^0.9.36",
-        "axios": "^1.9.0",
         "dotenv": "^16.5.0",
-        "lucide-react": "^0.510.0",
+        "ecare-root": "file:",
+        "js-cookie": "^3.0.5",
         "mysql2": "^3.14.1"
     }
 }
