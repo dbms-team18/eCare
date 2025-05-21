@@ -1,7 +1,7 @@
 
-interface ButtonProps {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>{
   label: string
-  onClick: () => void
+  onClick?: () => void
   variant?: 'solid' | 'outline'
   className?: string
   icon?: React.ComponentType
@@ -13,6 +13,7 @@ export default function Button({
   variant = 'solid',
   className = '',
   icon: Icon,
+  ...rest //
 }: ButtonProps) {
   const baseStyle =
     'flex items-center justify-center gap-2 px-6 py-2 rounded font-bold transition-colors duration-200 outline-none'
@@ -23,7 +24,11 @@ export default function Button({
       : 'border-2 border-[#1E40AF] text-[#1E40AF] hover:bg-[#1E40AF] hover:text-white'
 
   return (
-    <button onClick={onClick} className={`${baseStyle} ${variantStyle} ${className}`}>
+    <button
+      onClick={onClick}
+      className={`${baseStyle} ${variantStyle} ${className}`}
+      {...rest} // 
+    >
       {Icon && <Icon />}
       {label}
     </button>

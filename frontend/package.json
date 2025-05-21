@@ -17,6 +17,7 @@
     "eCare": "file:",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.510.0",
+    "lightningcss": "^1.30.1",
     "next": "^15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

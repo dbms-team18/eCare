@@ -16,23 +16,42 @@ export default function LoginPage() {
   const [role, setRole] = useState('')
   const router = useRouter() //假裝先登入
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     //console.log('email:', username)
     //console.log('password:', password)
     
-    // 假裝登入成功，直接跳轉
-    if (username && password) {
-      // 通常這邊會有登入 API 驗證
-      if (role === 'caregiver') {
-        router.push('/user/caregiver') // 照顧者主畫面
-      } else if (role === 'family') {
-        router.push('/user/family') // 家屬主畫面
-      }
-    } else {
-      
-      alert('請輸入帳號與密碼')
+    if (!username || !password || !role) {
+    alert('請填寫所有欄位');
+    return;
+  }
+
+  try {
+    const response = await fetch('http://localhost:3001/api/User/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, role: parseInt(role, 10) }),
+      credentials: 'include', // 傳 cookie
+});
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message);
+      return;
     }
+
+    // 根據回傳 role 導向不同畫面
+    if (data.role === 0) {
+      router.push('/user/caregiver');
+    } else {
+      router.push('/user/family');
+    }
+
+  } catch (err) {
+    console.error('登入錯誤:', err);
+    alert('登入失敗，請稍後再試');
+  }
   }
 
   return (
@@ -40,7 +59,7 @@ export default function LoginPage() {
     <LoginRegisterCard
       title="登入帳號"
       subtitle="請輸入帳號與密碼"
-      footer={<p>還沒帳號？
+      footer={<p>還沒有帳號？
         <Link href="/user/signup" className="text-blue-500 hover:underline">註冊</Link>
       </p>}
     >
@@ -71,10 +90,11 @@ export default function LoginPage() {
             <option value="" disabled hidden>
             請選擇身分別
             </option>
-            <option value="caregiver">照顧者</option>
-            <option value="family">家屬</option>
+            <option value="0">照顧者</option>
+            <option value="1">家屬</option>
         </select>
-        <Button label="登入" onClick={() => {}} className="w-full" />
+        <Button label="登入" type="submit" className="w-full" />
+
       
 
       </form>
