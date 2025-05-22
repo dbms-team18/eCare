@@ -2,9 +2,10 @@
 
 ### Test Login
 ```
-curl -X POST http://localhost:3000/api/User/login \
+curl -X POST http://localhost:3001/api/User/login \
   -H "Content-Type: application/json" \
-  -d '{"username": "Juliana", "password": "12345678abc"}'
+  -d '{"username": "Juliana", "password": "12345678abc",
+  "role":0}'
 ```
 
 ### Test Signup
@@ -74,4 +75,10 @@ curl -X POST http://localhost:3000/api/alert/readAlert \
     "signID": 1
   }'
 
+```
+
+### Test Dashboard
+```
+curl -X GET "http://localhost:3001/api/dashboard/getTopVitalSigns?userId=1&patientId=1" \
+  -H "Content-Type: application/json"
 ```

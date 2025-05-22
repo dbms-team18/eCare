@@ -13,17 +13,38 @@ export default function SignupPage() {
   const [role, setRole] = useState('')
   const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // 這裡可以寫送出資料到後端的邏輯
-    if (username && password) {
-      // 註冊成功，導回主畫面
-      router.push('/')
-    } else {
-      alert('請填寫完整資訊')
+    if (!username || !password || !email || role === '') {
+      alert('請填寫完整資訊');
+      return;
     }
 
-    console.log('註冊資訊', { username, password, email });
+    try {
+      const response = await fetch('http://localhost:3001/api/User/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username,
+          password,
+          email,
+          role: parseInt(role, 10), // 傳成 number
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        alert(data.message || '註冊失敗');
+        return;
+      }
+
+      alert('註冊成功');
+      router.push('/user/login');
+    } catch (error) {
+      console.error('註冊錯誤:', error);
+      alert('註冊失敗，請稍後再試');
+    }
   };
 
   return (
@@ -75,8 +96,8 @@ export default function SignupPage() {
             <option value="" disabled hidden>
             請選擇身分別
             </option>
-            <option value="caregiver">照顧者</option>
-            <option value="family">家屬</option>
+            <option value="0">照顧者</option>
+            <option value="1">家屬</option>
           </select>
 
           <Button label="註冊" onClick={() => {}} className="w-full" />
