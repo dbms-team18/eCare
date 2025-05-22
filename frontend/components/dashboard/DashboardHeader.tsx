@@ -1,41 +1,57 @@
 'use client';
 
-import React from 'react';
-import { useRouter } from 'next/navigation'; // 使用 Next.js 的 useRouter 來處理路由
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type DashboardHeaderProps = {
-  isCaregiver: number;
   patientName: string;
+  patientId: number;
   alertTriggered?: boolean;
 };
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({ isCaregiver, patientName, alertTriggered }) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({
+  patientName,
+  alertTriggered,
+}) => {
   const router = useRouter();
+  const [isCaregiver, setIsCaregiver] = useState<boolean>(false); // 預設為家屬
 
+  useEffect(() => {
+    const raw = localStorage.getItem('currentRole');
+    const role = raw ? JSON.parse(raw) : 1; // 預設為 1 = 家屬
+    setIsCaregiver(role === 0); // 0 = 照顧者，1 = 家屬
+  }, []);
 
   const handleAlertClick = () => {
-    router.push('/alert'); // 跳轉到 Alert 頁面
+    const raw = localStorage.getItem('currentPatient');
+    if (raw) {
+      const patient = JSON.parse(raw);
+      router.push(`/alert?patientId=${patient.id}`);
+    }
   };
 
   const handleVitalSignsClick = () => {
-    router.push('/vitalsigns'); // 跳轉到 Vitalsigns 頁面
+    router.push('/vitalsigns');
   };
 
   const handleTrendClick = () => {
-    router.push('/trend'); // 跳轉到 Trend 頁面
+    router.push('/trend');
   };
 
   const handlePersonaClick = () => {
-    router.push('/user/caregiver'); // 跳轉到 Caregiver 頁面
+    if (isCaregiver) {
+      router.push('/user/caregiver');
+    } else {
+      router.push('/user/family');
+    }
   };
 
   const handleHomeClick = () => {
-    router.push('/dashboard'); // 刷新頁面
+    router.push('/dashboard');
   };
 
   return (
     <div className="flex justify-between items-center mb-8">
-      {/* 左側標題與使用者資訊 */}
       <div className="flex items-center">
         <h1 className="text-2xl font-medium text-green-700 mr-4">eCare連心</h1>
         <div className="text-green-800">
@@ -44,21 +60,18 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ isCaregiver, patientN
         </div>
       </div>
 
-      {/* 導覽列 */}
       <nav className="flex items-center space-x-5">
         <ul className="flex items-center space-x-5">
-          {/* 鈴鐺圖標 */}
           <li>
             <button className="group" onClick={handleAlertClick}>
               <img
-                src={alertTriggered ? "/bell-alert.svg" : "/bell.svg"}
+                src={alertTriggered ? '/bell-alert.svg' : '/bell.svg'}
                 alt="Bell Icon"
                 className="w-10 h-10 group-hover:scale-110 transition-transform duration-200"
               />
             </button>
           </li>
 
-          {/* 新增紀錄圖標 */}
           <li>
             <button className="group" onClick={handleVitalSignsClick}>
               <img
@@ -69,9 +82,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ isCaregiver, patientN
             </button>
           </li>
 
-          {/* 趨勢圖標 */}
           <li>
-            <button className="group"  onClick={handleTrendClick}>
+            <button className="group" onClick={handleTrendClick}>
               <img
                 src="/trend-up.svg"
                 alt="Trend Icon"
@@ -80,11 +92,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ isCaregiver, patientN
             </button>
           </li>
 
-          {/* 個人頁面圖標 */}
           <li>
-            <button className="group"
-            onClick={handlePersonaClick}
-            >
+            <button className="group" onClick={handlePersonaClick}>
               <img
                 src="/profile.svg"
                 alt="Profile Icon"
@@ -93,12 +102,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ isCaregiver, patientN
             </button>
           </li>
 
-          {/* 主畫面圖標 */}
           <li>
-            <button
-              className="group"
-              onClick={handleHomeClick}
-            >
+            <button className="group" onClick={handleHomeClick}>
               <img
                 src="/home.svg"
                 alt="Home Icon"

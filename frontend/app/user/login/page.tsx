@@ -47,6 +47,9 @@ export default function LoginPage() {
     } else {
       router.push('/user/family');
     }
+    // 寫 local storge
+    localStorage.setItem('uid', JSON.stringify(data.uid));
+    localStorage.setItem('currentRole', JSON.stringify(data.role)) // 先暫存
 
   } catch (err) {
     console.error('登入錯誤:', err);
