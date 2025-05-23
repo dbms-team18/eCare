@@ -4,7 +4,34 @@ import { NextApiRequest, NextApiResponse} from 'next';
 // For MySQL2
 //import ReselutSetHeader from 'mysql2/promise';
 import PatientData from 'mysql2'; //..?
+import { RowDataPacket } from 'mysql2';
+import type { ResultSetHeader } from 'mysql2';
 import mysqlConnectionPool from '../../../src/lib/mysql';
+import { parse } from 'cookie'
+
+export const createPatient = async (req: NextApiRequest, res: NextApiResponse) => {
+    // 跨域設定
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      return res.status(200).end();
+    }
+  
+    if (req.method !== 'POST') {
+      return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+    }
+  
+    // 從 cookie 取得 uid
+    const cookieHeader = req.headers.cookie;
+    const cookies = cookieHeader ? parse(cookieHeader) : {};
+    const uid = cookies.uid;
+  
+    if (!uid) {
+      return res.status(401).json({ success: false, message: '未登入或缺少 uid cookie' });
+    }
 
 // Type for the patient data
 type PatientData = {
