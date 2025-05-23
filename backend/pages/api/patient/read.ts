@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { RowDataPacket } from 'mysql2';
 import mysqlConnectionPool from '../../../src/lib/mysql';
+//import { parse } from 'cookie';
 
 interface PatientRow extends RowDataPacket {
   id: number;
@@ -20,6 +21,22 @@ interface PatientRow extends RowDataPacket {
   userId: number;
 }
 
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+    // Add CORS headers (like your alert code)
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      return res.status(200).end();
+    }
+  
+    if (req.method === 'GET') {
+      return getPatientData(req, res);
+    }
+    return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+  }
 export const getPatientData = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'GET') {
     return res.status(405).json({ success: false, message: 'Method Not Allowed' });
@@ -86,9 +103,4 @@ export const getPatientData = async (req: NextApiRequest, res: NextApiResponse) 
   }
 };
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
-    return getPatientData(req, res);
-  }
-  return res.status(405).json({ success: false, message: 'Method Not Allowed' });
-}
+// Duplicate handler function removed

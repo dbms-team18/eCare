@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { RowDataPacket } from 'mysql2';
 import mysqlConnectionPool from '../../../src/lib/mysql';
+//import { parse } from 'cookie';
 
 interface PatientRow extends RowDataPacket {
   id: number;
@@ -19,6 +20,9 @@ interface PatientRow extends RowDataPacket {
   lastUpdId: number;
   userId: number;
 }
+
+// Removed unused 'handler' function to resolve the error.
+  
 
 export const getAllPatients = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'GET') {
@@ -67,7 +71,7 @@ export const getAllPatients = async (req: NextApiRequest, res: NextApiResponse) 
   }
 };
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default function getAllPatientsHandler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     return getAllPatients(req, res);
   }
