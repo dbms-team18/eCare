@@ -6,6 +6,8 @@ import { usePatient } from '@/contexts/DashboardPatientContext';
 
 type DashboardHeaderProps = {
   alertTriggered?: boolean;
+  patientName: string;
+  isCaregiver: number;
 };
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ alertTriggered }) => {
@@ -20,10 +22,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ alertTriggered }) => 
   const handleVitalSignsClick = () => {
     router.push('/vitalsigns');
   };
-
-  const handleTrendClick = () => {
-    router.push('/trend');
-  };
+  // 暫時註解掉趨勢頁面的按鈕，因為未實作
+  // const handleTrendClick = () => {
+  //   router.push('/trend');
+  // };
 
   const handlePersonaClick = () => {
     router.push(isCaregiver ? '/user/caregiver' : '/user/family');
@@ -59,11 +61,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ alertTriggered }) => 
               <img src="/record.svg" alt="Record Icon" className="w-10 h-10" />
             </button>
           </li>
-          <li>
+          {/* 暫時註解掉趨勢頁面的按鈕，因為未實作 */}
+          {/* <li>
             <button className="group" onClick={handleTrendClick}>
               <img src="/trend-up.svg" alt="Trend Icon" className="w-10 h-10" />
             </button>
-          </li>
+          </li> */}
           <li>
             <button className="group" onClick={handlePersonaClick}>
               <img src="/profile.svg" alt="Profile Icon" className="w-10 h-10" />

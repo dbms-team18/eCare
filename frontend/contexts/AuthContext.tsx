@@ -3,7 +3,7 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 
 // 用戶角色類型
-export type UserRole = 'caregiver' | 'family';
+export type UserRole = 0 | 1; // 0: caregiver, 1: family
 
 // 用戶類型
 export type User = {
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           const defaultUser: User = {
             id: 'dev-user',
             name: '默認用戶',
-            role: 'caregiver',
+            role: 0,
           };
           setUser(defaultUser);
         }
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const defaultUser: User = {
           id: 'dev-user',
           name: '默認用戶',
-          role: 'caregiver',
+          role: 0,
         };
         setUser(defaultUser);
       } finally {
@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const mockUser: User = {
         id: '123',
         name: username,
-        role: username.toLowerCase().includes('care') ? 'caregiver' : 'family',
+        role: username.toLowerCase().includes('care') ? 0 : 1,
       };
       
       // 將用戶資料保存到 localStorage
@@ -109,12 +109,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // 檢查是否為照顧者
   const isCaregiver = (): boolean => {
-    return user?.role === 'caregiver';
+    return user?.role === 0;
   };
 
   // 檢查是否為家屬
   const isFamily = (): boolean => {
-    return user?.role === 'family';
+    return user?.role === 1;
   };
 
   // 提供上下文值
