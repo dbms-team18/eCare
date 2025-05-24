@@ -86,7 +86,7 @@ export default function ProfilePage() {
     const handleSubmit = () => {
         const selected = patients.find((p) => p.id === selectedId)
         if (selected) {
-          setPatient({ id: selected.id, name: selected.name });
+          setPatient({ id: Number(selected.id), name: selected.name });
           localStorage.setItem('currentPatient', JSON.stringify(selected)) // 先暫存
           router.push('/dashboard')
           alert(`已切換至個案：${selected.name}`)

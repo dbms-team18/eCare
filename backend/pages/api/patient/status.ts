@@ -27,7 +27,11 @@ export const managePatientStatus = async (req: NextApiRequest, res: NextApiRespo
 
   try {
     // Get request body
-    const { patientId, userId, isArchived } = req.body;
+    const { 
+      patientId,
+      userId, 
+      isArchived 
+    } = req.body;
     
     // 檢查必要欄位
     if (!patientId || !userId || isArchived === undefined) {
