@@ -1,7 +1,7 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { RowDataPacket } from 'mysql2';
-import mysqlConnectionPool from '../../../src/lib/mysql';
-import { parse } from 'cookie';
+import type { NextApiRequest, NextApiResponse } from "next";
+import { RowDataPacket } from "mysql2";
+import mysqlConnectionPool from "../../../src/lib/mysql";
+import { parse } from "cookie";
 
 interface PatientRow extends RowDataPacket {
   id: number;
@@ -23,14 +23,14 @@ interface PatientRow extends RowDataPacket {
 // Helper function to get all patients
 async function getAllPatients(userId: number): Promise<PatientRow[]> {
   const connection = await mysqlConnectionPool.getConnection();
-  
+
   try {
     // 查詢病患資料
     const [patients] = await connection.execute<PatientRow[]>(
-      'SELECT * FROM patient WHERE userId = ? ORDER BY lastUpd DESC',
+      "SELECT * FROM patient WHERE userId = ? ORDER BY lastUpd DESC",
       [userId]
     );
-    
+
     return patients;
   } finally {
     connection.release();
@@ -38,19 +38,24 @@ async function getAllPatients(userId: number): Promise<PatientRow[]> {
 }
 
 // Main API handler
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   // 跨域設定
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
 
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     return res.status(200).end();
   }
 
-  if (req.method !== 'GET') {
-    return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+  if (req.method !== "GET") {
+    return res
+      .status(405)
+      .json({ success: false, message: "Method Not Allowed" });
   }
 
   const cookieHeader = req.headers.cookie;
@@ -58,40 +63,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const uid = cookies.uid;
 
   if (!uid) {
-    return res.status(401).json({ success: false, message: '未登入或缺少 uid cookie' });
+    return res
+      .status(401)
+      .json({ success: false, message: "未登入或缺少 uid cookie" });
   }
 
   const { userId } = req.query;
-  
+
   // Use userId from query or uid from cookie
   const targetUserId = userId ? Number(userId) : Number(uid);
-  
+
   if (!targetUserId) {
-    return res.status(400).json({ success: false, message: '缺少 userId 參數' });
+    return res
+      .status(400)
+      .json({ success: false, message: "缺少 userId 參數" });
   }
 
   try {
     const patients = await getAllPatients(targetUserId);
-    
-    // If no patients found
-    if (patients.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        message: '沒有找到病患資料' 
-      });
-    }
-    
-    // 回傳查詢結果
+
+    // 修改：即使沒有病患資料也返回200狀態碼和空陣列
     return res.status(200).json({
       success: true,
-      data: patients
+      data: patients,
+      message: patients.length === 0 ? "目前無病患資料" : undefined,
     });
-
   } catch (err: unknown) {
-    console.error('Get all patients error:', err);
-    return res.status(500).json({ 
-      success: false, 
-      message: err instanceof Error ? err.message : String(err)
+    console.error("Get all patients error:", err);
+    return res.status(500).json({
+      success: false,
+      message: err instanceof Error ? err.message : String(err),
     });
   }
 }
