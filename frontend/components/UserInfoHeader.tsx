@@ -58,11 +58,7 @@ export default function UserInfoHeader() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('userId')
-    localStorage.removeItem('currentPatient')
-    router.push('/') // 根據你的專案登入頁路徑調整
-  }
+  
 
   return (
     <div className="w-full bg-white shadow-sm px-6 py-3 flex justify-between items-center">

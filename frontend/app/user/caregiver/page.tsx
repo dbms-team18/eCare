@@ -1,13 +1,12 @@
 'use client'
 
 // app/user/profile/page.tsx
-import Cookies from 'js-cookie'
 import Button from '../../../components/Button'
 import UserInfoHeader from '../../../components/UserInfoHeader'
 import { useRouter } from 'next/navigation'
 import { useEffect,useState } from 'react'
-import Link from 'next/link'
-import { BiUser, BiPlus, BiArrowBack } from 'react-icons/bi'
+
+import { BiUser, BiPlus,  } from 'react-icons/bi'
 
 interface Patient {
   id: number
@@ -16,13 +15,32 @@ interface Patient {
   age: number
 }
 
-export default function ProfilePage() {
+export default function Caregiver() {
     const router = useRouter()
     const [patients, setPatients] = useState<Patient[]>([])
     const [selectedId, setSelectedId] = useState('')
 
     useEffect(() => {
-      fetch('/api/user/getUser', {
+      fetch('backend/pages/api/patient/getAll', {
+        credentials: 'include' // ✅ 務必加這行，才能送出 cookie
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setPatients(data.data)
+          } else {
+            alert(data.message || '病患資料載入失敗')
+          }
+        })
+        .catch((err) => {
+          console.error('錯誤:', err)
+          alert('連線失敗')
+        })
+    }, [])
+
+
+    /*useEffect(() => {
+      fetch('/api/User/getUser', {
         credentials: 'include', // 一定要加，才會帶上 cookie
       })
         .then((res) => res.json())
@@ -35,7 +53,7 @@ export default function ProfilePage() {
 
           const userId = data.user.userId // 假設 API 回傳有 userId（你可加在組員的 API 裡）
           // 或者你可以手動記到 state（若 API 沒回傳 userId 就不能接 getAll）
-          fetch(`/api/patient/getAll?userId=${userId}`)
+          fetch(`/api/patient/get?userId=${userId}`)
             .then((res) => res.json())
             .then((patientData) => {
               if (patientData.success) {
@@ -49,7 +67,7 @@ export default function ProfilePage() {
           console.error(err)
           alert('發生錯誤，請稍後再試')
         })
-    }, [])
+    }, [])*/
 
     const handleSubmit = () => {
       const selected = patients.find((p) => String(p.id) === selectedId)
@@ -62,7 +80,6 @@ export default function ProfilePage() {
     }
 
 
-    
     return (
       <div>
         <UserInfoHeader />
@@ -89,8 +106,8 @@ export default function ProfilePage() {
                     type="radio"
                     name="selectedPatient"
                     value={p.id}
-                    checked={selectedId === p.id}
-                    onChange={() => setSelectedId(p.id)}
+                    checked={selectedId === String(p.id)}
+                    onChange={() => setSelectedId(String(p.id))}
                     className="accent-blue-500"
                   />
                   <div>
@@ -99,7 +116,7 @@ export default function ProfilePage() {
                       <span className="font-semibold">{p.name}</span>
                     </div>
                     <div className="text-sm text-gray-600 mt-1">
-                      身分證：{p.idNumber.slice(-4)}｜年齡：{p.age}
+                      身分證：{p.idNum.slice(-4)}｜年齡：{p.age}
                     </div>
                   </div>
                 </label>
