@@ -10,20 +10,20 @@ export default function AddPatientPage() {
   const [name, setName] = useState('')
   const [age, setAge] = useState('')
   const [gender, setGender] = useState('')
-  const [address, setAddress] = useState('')
-  const [idNumber, setIdNumber] = useState('')
-  const [insuranceNumber, setInsuranceNumber] = useState('')
-  const [emergencyContact, setEmergencyContact] = useState('')
-  const [emergencyPhone, setEmergencyPhone] = useState('')
-  const [notes, setNotes] = useState('')
+  const [addr, setAddress] = useState('')
+  const [idNum, setIdNumber] = useState('')
+  const [nhCardNum, setInsuranceNumber] = useState('')
+  const [emerName, setEmergencyContact] = useState('')
+  const [emerPhone, setEmergencyPhone] = useState('')
+  const [info, setNotes] = useState('')
   const router = useRouter()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     console.log({
-      name, age, gender, address,
-      idNumber, insuranceNumber,
-      emergencyContact, emergencyPhone, notes
+      name, age, gender, addr,
+      idNum, nhCardNum,
+      emerName, emerPhone, info
     })
     alert('資料已送出（模擬）')
     setTimeout(() => {
@@ -97,7 +97,7 @@ export default function AddPatientPage() {
             <label className="block text-gray-700">地址</label>
             <input
               type="text"
-              value={address}
+              value={addr}
               onChange={(e) => setAddress(e.target.value)}
               className="w-full border border-gray-300 px-3 py-2 rounded text-gray-900"
             />
@@ -109,7 +109,7 @@ export default function AddPatientPage() {
               <label className="block text-gray-700">身分證字號</label>
               <input
                 type="text"
-                value={idNumber}
+                value={idNum
                 onChange={(e) => setIdNumber(e.target.value)}
                 className="w-full border border-gray-300 px-3 py-2 rounded text-gray-900"
               />
@@ -118,7 +118,7 @@ export default function AddPatientPage() {
               <label className="block text-gray-700">健保卡號</label>
               <input
                 type="text"
-                value={insuranceNumber}
+                value={nhCardNum}
                 onChange={(e) => setInsuranceNumber(e.target.value)}
                 className="w-full border border-gray-300 px-3 py-2 rounded text-gray-900"
               />
@@ -131,7 +131,7 @@ export default function AddPatientPage() {
               <label className="block text-gray-700">緊急聯絡人</label>
               <input
                 type="text"
-                value={emergencyContact}
+                value={emerName}
                 onChange={(e) => setEmergencyContact(e.target.value)}
                 className="w-full border border-gray-300 px-3 py-2 rounded text-gray-900"
               />
@@ -140,7 +140,7 @@ export default function AddPatientPage() {
               <label className="block text-gray-700">緊急聯絡電話</label>
               <input
                 type="text"
-                value={emergencyPhone}
+                value={emerPhone}
                 onChange={(e) => setEmergencyPhone(e.target.value)}
                 className="w-full border border-gray-300 px-3 py-2 rounded text-gray-900"
               />
@@ -151,7 +151,7 @@ export default function AddPatientPage() {
           <div>
             <label className="block text-gray-700">備註</label>
             <textarea
-              value={notes}
+              value={info}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full border border-gray-300 px-3 py-2 rounded  text-gray-900 resize-none"
               rows={3}
