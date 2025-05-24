@@ -1,49 +1,34 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@/contexts/DashboardUserContext';
+import { usePatient } from '@/contexts/DashboardPatientContext';
 
 type DashboardHeaderProps = {
-  patientName: string;
-  patientId: number;
   alertTriggered?: boolean;
+  patientName: string;
+  isCaregiver: number;
 };
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({
-  patientName,
-  alertTriggered,
-}) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ alertTriggered }) => {
   const router = useRouter();
-  const [isCaregiver, setIsCaregiver] = useState<boolean>(false); // 預設為家屬
-
-  useEffect(() => {
-    const raw = localStorage.getItem('currentRole');
-    const role = raw ? JSON.parse(raw) : 1; // 預設為 1 = 家屬
-    setIsCaregiver(role === 0); // 0 = 照顧者，1 = 家屬
-  }, []);
+  const { isCaregiver } = useUser();
+  const { patientName, patientId } = usePatient();
 
   const handleAlertClick = () => {
-    const raw = localStorage.getItem('currentPatient');
-    if (raw) {
-      const patient = JSON.parse(raw);
-      router.push(`/alert?patientId=${patient.id}`);
-    }
+    router.push(`/alert?patientId=${patientId}`);
   };
 
   const handleVitalSignsClick = () => {
     router.push('/vitalsigns');
   };
-
-  const handleTrendClick = () => {
-    router.push('/trend');
-  };
+  // 暫時註解掉趨勢頁面的按鈕，因為未實作
+  // const handleTrendClick = () => {
+  //   router.push('/trend');
+  // };
 
   const handlePersonaClick = () => {
-    if (isCaregiver) {
-      router.push('/user/caregiver');
-    } else {
-      router.push('/user/family');
-    }
+    router.push(isCaregiver ? '/user/caregiver' : '/user/family');
   };
 
   const handleHomeClick = () => {
@@ -71,44 +56,25 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               />
             </button>
           </li>
-
           <li>
             <button className="group" onClick={handleVitalSignsClick}>
-              <img
-                src="/record.svg"
-                alt="Record Icon"
-                className="w-10 h-10 group-hover:scale-110 transition-transform duration-200"
-              />
+              <img src="/record.svg" alt="Record Icon" className="w-10 h-10" />
             </button>
           </li>
-
-          <li>
+          {/* 暫時註解掉趨勢頁面的按鈕，因為未實作 */}
+          {/* <li>
             <button className="group" onClick={handleTrendClick}>
-              <img
-                src="/trend-up.svg"
-                alt="Trend Icon"
-                className="w-10 h-10 group-hover:scale-110 transition-transform duration-200"
-              />
+              <img src="/trend-up.svg" alt="Trend Icon" className="w-10 h-10" />
             </button>
-          </li>
-
+          </li> */}
           <li>
             <button className="group" onClick={handlePersonaClick}>
-              <img
-                src="/profile.svg"
-                alt="Profile Icon"
-                className="w-10 h-10 group-hover:scale-110 transition-transform duration-200"
-              />
+              <img src="/profile.svg" alt="Profile Icon" className="w-10 h-10" />
             </button>
           </li>
-
           <li>
             <button className="group" onClick={handleHomeClick}>
-              <img
-                src="/home.svg"
-                alt="Home Icon"
-                className="w-10 h-10 group-hover:scale-110 transition-transform duration-200"
-              />
+              <img src="/home.svg" alt="Home Icon" className="w-10 h-10" />
             </button>
           </li>
         </ul>

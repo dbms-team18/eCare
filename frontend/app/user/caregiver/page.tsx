@@ -4,9 +4,10 @@
 import Button from '../../../components/Button'
 import UserInfoHeader from '../../../components/UserInfoHeader'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { BiUser, BiPlus, BiArrowBack } from 'react-icons/bi'
+import { usePatient } from '@/contexts/DashboardPatientContext';
 import { useEffect,useState } from 'react'
-
-import { BiUser, BiPlus,  } from 'react-icons/bi'
 
 interface Patient {
   id: number
@@ -16,13 +17,17 @@ interface Patient {
 }
 
 export default function Caregiver() {
+
+export default function ProfilePage() {
+    const { setPatient } = usePatient();
+
     const router = useRouter()
     const [patients, setPatients] = useState<Patient[]>([])
     const [selectedId, setSelectedId] = useState('')
 
     useEffect(() => {
       fetch('backend/pages/api/patient/getAll', {
-        credentials: 'include' // ✅ 務必加這行，才能送出 cookie
+        credentials: 'include' // 加這行才能送出 cookie
       })
         .then((res) => res.json())
         .then((data) => {
@@ -76,6 +81,20 @@ export default function Caregiver() {
         alert(`已切換至個案：${selected.name}`)
       } else {
         alert('請先選擇一位個案')
+
+// 確認切換後 1. 存 localStorage 2. 切到 dashboard
+    const handleSubmit = () => {
+        const selected = patients.find((p) => p.id === selectedId)
+        if (selected) {
+          setPatient({ id: selected.id, name: selected.name });
+          localStorage.setItem('currentPatient', JSON.stringify(selected)) // 先暫存
+          router.push('/dashboard')
+          alert(`已切換至個案：${selected.name}`)
+            
+        } else {
+            alert('請先選擇一位個案')
+        }
+
       }
     }
 

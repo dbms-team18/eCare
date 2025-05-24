@@ -1,11 +1,12 @@
 'use client';
 
 import React from 'react';
+// import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import PatientInfo from '../../components/dashboard/PatientInfo';
 import VitalSignsGrid from '../../components/dashboard/VitalSignsGrid';
-import { VitalSignRecord } from '@/types/api';
+// import { VitalSignRecord } from '@/types/api';
 import { idToCategory,unitMap, iconMap} from '@/constants/vitalSignMap';
 
 export default function Dashboard() {
@@ -24,6 +25,10 @@ export default function Dashboard() {
   ] as Array<{ signID: string; vitalTypeId: number; value: number; status: string }>,
 };
 
+
+
+
+
   const handleAddRecord = (id: string) => {
     const vitalTypeId = Number(id);
     router.push(`/vitalsigns?category=${vitalTypeId}`);
@@ -32,7 +37,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-r from-green-100 to-yellow-100 p-4">
       <div className="max-w-6xl mx-auto bg-white rounded-3xl p-8 shadow-md">
-        <DashboardHeader isCaregiver={1} patientName={patientData.name} />
+        <DashboardHeader />
         <div className="grid grid-cols-12 gap-6">
           <PatientInfo
             message={patientData.message}
