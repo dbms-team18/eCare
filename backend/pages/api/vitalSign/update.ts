@@ -7,7 +7,15 @@ export const updateVitalSign = async (
   req: NextApiRequest,
   res: NextApiResponse
 ) => {
-  if (req.method !== "PUT") {
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    return res.status(200).end();
+  }
+  if (req.method !== "POST") {
     return res.status(405).json({ success: false, err: "Method Not Allowed" });
   }
   const {
