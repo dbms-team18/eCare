@@ -5,15 +5,18 @@ import LoginRegisterCard from '../../../components/LoginRegisterCard'
 import Button from '../../../components/Button'
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'
+import { useUser } from '@/contexts/DashboardUserContext';
+
 
 
 //import Button from 'app/components/Button'
 
 export default function LoginPage() {
+  const { setRole } = useUser();
   //const [email, setEmail] = useState('')
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState('')
+  const [role, setLocalRole] = useState('')
   const router = useRouter() //假裝先登入
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,6 +53,8 @@ export default function LoginPage() {
     // 寫 local storge
     localStorage.setItem('uid', JSON.stringify(data.uid));
     localStorage.setItem('currentRole', JSON.stringify(data.role)) // 先暫存
+    setRole(data.role); 
+
 
   } catch (err) {
     console.error('登入錯誤:', err);
@@ -86,7 +91,7 @@ export default function LoginPage() {
         {/* 身分別選擇 */}
         <select
             value={role}
-            onChange={(e) => setRole(e.target.value)}
+            onChange={(e) => setLocalRole(e.target.value)}
             className="w-full border border-gray-300 px-4 py-2 rounded text-gray-700 text-left placeholder-gray-500 appearance-none"
             required
           >

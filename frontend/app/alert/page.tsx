@@ -30,41 +30,11 @@ const AlertPage: React.FC = () => {
   const patientId = searchParams.get('patientId');
 
     // 定義會更改的變數
-  const [isCaregiver, setIsCaregiver] = useState<number>(0);
-  const [patientName, setPatientName] = useState<string>(''); 
   const [alerts, setAlerts] = useState<allAlertData[]>([]);
   const [confirmed, setConfirmed] = useState<{ [id: string]: boolean }>({});
   
 
 
-  // 從 localstorage 取得 role(isCaregiver), patientName
-  useEffect(() => {
-  const pName = localStorage.getItem('currentPatient');
-  const uRole = localStorage.getItem('currentRole');
-
-  if (pName) {
-    try {
-      const parsed = JSON.parse(pName);
-      if (parsed.name) {
-        setPatientName(parsed.name); // 設定病患名稱
-      }
-    } catch (e) {
-      console.error('解析 localStorage currentPatient 失敗:', e);
-    }
-  }
-
-  if (uRole) {
-    try {
-      const parsed = JSON.parse(uRole); // parsed 是數字 0 或 1
-      setIsCaregiver(parsed);
-    } catch (e) {
-      console.error('解析 localStorage currentRole 失敗:', e);
-    }
-  }
-}, []);
-
-
-    
 
   // 用取到的 patientid 抓 alert 資料
   useEffect(() => {
@@ -90,7 +60,7 @@ const AlertPage: React.FC = () => {
         const result = await res.json();
         if (result.success && Array.isArray(result.allAlertData)) {
           setAlerts(result.allAlertData);
-          console.warn('成功回傳:', result);
+          console.log('成功回傳:', result);
         }
         else {
           console.warn('警報資料格式錯誤:', result);
@@ -135,11 +105,7 @@ const AlertPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-r from-green-100 to-yellow-100 p-4">
       <div className="max-w-6xl mx-auto bg-white rounded-3xl p-8 shadow-md">
           {/* 左上身份顯示  */}
-        <DashboardHeader
-          isCaregiver = {isCaregiver}
-          patientName={patientName}
-          patientId={Number(patientId) || 0}
-        />
+          <DashboardHeader />
         <h1 className="text-2xl font-bold text-gray-800 mb-4">歷史 Alert 紀錄</h1>
 
         {alerts.length === 0 ? (
