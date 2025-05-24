@@ -58,6 +58,8 @@ export default function UserInfoHeader() {
     }
   };
 
+  
+
   return (
     <div className="w-full bg-white shadow-sm px-6 py-3 flex justify-between items-center">
       <h1 className="text-xl font-semibold text-gray-800">eCare連心長照系統</h1>

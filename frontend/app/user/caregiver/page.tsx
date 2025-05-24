@@ -4,20 +4,83 @@
 import Button from '../../../components/Button'
 import UserInfoHeader from '../../../components/UserInfoHeader'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 import Link from 'next/link'
 import { BiUser, BiPlus, BiArrowBack } from 'react-icons/bi'
 import { usePatient } from '@/contexts/DashboardPatientContext';
+import { useEffect,useState } from 'react'
 
+interface Patient {
+  id: number
+  name: string
+  idNum: string
+  age: number
+}
+
+export default function Caregiver() {
 
 export default function ProfilePage() {
     const { setPatient } = usePatient();
+
     const router = useRouter()
-    const patients = [
-        { id: '1', name: '王小明', idNumber: 'F229123456', age: 70 },
-        { id: '2', name: '李阿姨', idNumber: 'F229654321', age: 83 },
-      ]
+    const [patients, setPatients] = useState<Patient[]>([])
     const [selectedId, setSelectedId] = useState('')
+
+    useEffect(() => {
+      fetch('backend/pages/api/patient/getAll', {
+        credentials: 'include' // 加這行才能送出 cookie
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setPatients(data.data)
+          } else {
+            alert(data.message || '病患資料載入失敗')
+          }
+        })
+        .catch((err) => {
+          console.error('錯誤:', err)
+          alert('連線失敗')
+        })
+    }, [])
+
+
+    /*useEffect(() => {
+      fetch('/api/User/getUser', {
+        credentials: 'include', // 一定要加，才會帶上 cookie
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.success || !data.user) {
+            alert('尚未登入或使用者資訊錯誤')
+            router.push('/user/login')
+            return
+          }
+
+          const userId = data.user.userId // 假設 API 回傳有 userId（你可加在組員的 API 裡）
+          // 或者你可以手動記到 state（若 API 沒回傳 userId 就不能接 getAll）
+          fetch(`/api/patient/get?userId=${userId}`)
+            .then((res) => res.json())
+            .then((patientData) => {
+              if (patientData.success) {
+                setPatients(patientData.data)
+              } else {
+                alert(patientData.message || '病患資料載入失敗')
+              }
+            })
+        })
+        .catch((err) => {
+          console.error(err)
+          alert('發生錯誤，請稍後再試')
+        })
+    }, [])*/
+
+    const handleSubmit = () => {
+      const selected = patients.find((p) => String(p.id) === selectedId)
+      if (selected) {
+        localStorage.setItem('currentPatient', JSON.stringify(selected))
+        alert(`已切換至個案：${selected.name}`)
+      } else {
+        alert('請先選擇一位個案')
 
 // 確認切換後 1. 存 localStorage 2. 切到 dashboard
     const handleSubmit = () => {
@@ -31,7 +94,10 @@ export default function ProfilePage() {
         } else {
             alert('請先選擇一位個案')
         }
+
       }
+    }
+
 
     return (
       <div>
@@ -44,10 +110,8 @@ export default function ProfilePage() {
             
             {/* 返回箭頭 + 標題 */}
             <div className="flex items-center gap-2 mb-6 text-gray-800">
-              <Link href="/" className="text-gray-600 hover:text-black text-2xl">
-                <BiArrowBack />
-              </Link>
-              <h2 className="text-2xl font-bold">請選擇您要管理的個案</h2>
+              
+              <h2 className="text-2xl font-bold text-center">請選擇您要管理的個案</h2>
             </div>
 
             {/* 個案列表 */}
@@ -61,8 +125,8 @@ export default function ProfilePage() {
                     type="radio"
                     name="selectedPatient"
                     value={p.id}
-                    checked={selectedId === p.id}
-                    onChange={() => setSelectedId(p.id)}
+                    checked={selectedId === String(p.id)}
+                    onChange={() => setSelectedId(String(p.id))}
                     className="accent-blue-500"
                   />
                   <div>
@@ -71,7 +135,7 @@ export default function ProfilePage() {
                       <span className="font-semibold">{p.name}</span>
                     </div>
                     <div className="text-sm text-gray-600 mt-1">
-                      身分證：{p.idNumber.slice(-4)}｜年齡：{p.age}
+                      身分證：{p.idNum.slice(-4)}｜年齡：{p.age}
                     </div>
                   </div>
                 </label>
