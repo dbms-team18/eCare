@@ -5,6 +5,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 type PatientContextType = {
   patientName: string;
   patientId: number;
+  setPatient: (patient: { name: string; id: number }) => void;
 };
 
 const PatientContext = createContext<PatientContextType | null>(null);

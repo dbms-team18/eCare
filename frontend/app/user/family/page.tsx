@@ -7,8 +7,11 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Link from 'next/link'
 import { BiUser, BiPlus, BiArrowBack } from 'react-icons/bi'
+import { usePatient } from '@/contexts/DashboardPatientContext';
+
 
 export default function ProfilePage() {
+    const { setPatient } = usePatient();
     const router = useRouter()
     const patients = [
         { id: '1', name: '王小明', idNumber: 'F229123456', age: 70 },
@@ -19,6 +22,7 @@ export default function ProfilePage() {
     const handleSubmit = () => {
         const selected = patients.find((p) => p.id === selectedId)
         if (selected) {
+            setPatient({ id: Number(selected.id), name: selected.name });
             localStorage.setItem('currentPatient', JSON.stringify(selected)) // 先暫存
             router.push('/dashboard')
             alert(`已切換至個案：${selected.name}`)
