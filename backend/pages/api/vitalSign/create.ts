@@ -4,6 +4,14 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 import axios from "axios";
 
 const createVitalSign = async (req: NextApiRequest, res: NextApiResponse) => {
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    return res.status(200).end();
+  }
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, err: "Method Not Allowed" });
   }
@@ -138,7 +146,7 @@ const createVitalSign = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(200).json({
       success: true,
       message: "生理資料創建成功",
-      signId,
+      signId: signId.toString(),
       alertTrigger,
     });
   } catch (err: unknown) {

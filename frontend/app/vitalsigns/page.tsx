@@ -15,7 +15,7 @@ import { formatCreateDate } from "@/lib/format";
 
 // Define interfaces
 interface VitalSignRecord {
-  signId?: string;
+  signId: string;
   userId: string;
   patientId: string;
   vitalTypeId: number;
@@ -27,12 +27,10 @@ interface VitalSignRecord {
   weight?: number;
   create_date: number;
   comment: string;
-  period?: string;
   value?: number | string; // For UI purposes
 }
 
 interface NewRecordForm {
-  period: string;
   value: string;
   comment: string;
   vitalTypeId: string;
@@ -64,8 +62,6 @@ const vitalMeta: Record<string, VitalSignMetadata> = {
   "6": { unit: "kg", placeholder: "輸入數值 單位: kg", min: 0, max: 300 }, // 體重
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
-
 const VitalSignsPage: React.FC = () => {
   const searchParams = useSearchParams();
   const vitalTypeIdFromQuery = searchParams.get("category") || "";
@@ -82,7 +78,6 @@ const VitalSignsPage: React.FC = () => {
 
   // Form state
   const [newRecord, setNewRecord] = useState<NewRecordForm>({
-    period: "",
     value: "",
     comment: "",
     vitalTypeId: vitalTypeIdFromQuery || "",
@@ -93,6 +88,9 @@ const VitalSignsPage: React.FC = () => {
   });
 
   // Modal/popup states
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [newRecordId, setNewRecordId] = useState<string | null>(null);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
@@ -108,7 +106,6 @@ const VitalSignsPage: React.FC = () => {
     setNewRecord((prev) => ({
       ...prev,
       vitalTypeId: vitalTypeIdFromQuery || "",
-      period: "",
       value: "",
       systolic: "",
       diastolic: "",
@@ -116,18 +113,20 @@ const VitalSignsPage: React.FC = () => {
   }, [vitalTypeIdFromQuery]);
 
   // API functions
+  // const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
   const fetchVitalSigns = async () => {
     try {
-      // 使用環境變數來構建 API URL
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/vitalSign/getAll`;
+      setLoading(true);
+      setError(null);
 
-      // 構建參數
       const params = new URLSearchParams({
         userId: userId.toString(),
         patientId: patientId.toString(),
       });
 
-      const response = await fetch(`${apiUrl}?${params.toString()}`);
+      const response = await fetch(
+        `http://localhost:3001/api/vitalSign/getAll?${params.toString()}`
+      );
 
       if (!response.ok) {
         // 處理錯誤狀態
@@ -136,64 +135,89 @@ const VitalSignsPage: React.FC = () => {
       }
 
       const data = await response.json();
-      return data.vitalSigns;
+      if (data.success && data.vitalSigns) {
+        const transformedData = transformApiDataToFrontend(data.vitalSigns);
+        setRecords(transformedData);
+      } else {
+        setRecords([]);
+      }
     } catch (error) {
       console.error("獲取生理指標出錯:", error);
-      throw error;
+      setError(error instanceof Error ? error.message : "獲取資料失敗");
+      setRecords([]); // 發生錯誤時設為空陣列
+    } finally {
+      setLoading(false); // 無論成功或失敗都要停止 loading
     }
-
-    // Mock data for development
-    //     if (process.env.NODE_ENV === "development") {
-    //       setRecords([
-    //         {
-    //           signId: "1",
-    //           userId: "1",
-    //           patientId: "1",
-    //           vitalTypeId: 1,
-    //           bloodSugar: 110,
-    //           create_date: 202505111150,
-    //           comment: "早上空腹",
-    //           period: "飯前",
-    //         },
-    //         {
-    //           signId: "2",
-    //           userId: "1",
-    //           patientId: "1",
-    //           vitalTypeId: 2,
-    //           systolic: 120,
-    //           create_date: 202505101450,
-    //           comment: "下午紀錄",
-    //         },
-    //         {
-    //           signId: "3",
-    //           userId: "1",
-    //           patientId: "1",
-    //           vitalTypeId: 3,
-    //           diastolic: 80,
-    //           create_date: 202505101600,
-    //           comment: "",
-    //         },
-    //       ]);
-    //     }
-    //   } finally {
-    //     setLoading(false);
   };
+  // 資料轉換函數
+  const transformApiDataToFrontend = (apiData: any[]): VitalSignRecord[] => {
+    return apiData.map((item) => {
+      // 轉換 recordDateTime 到 create_date (YYYYMMDDHHmm 格式)
+      const recordDate = new Date(item.recordDateTime);
+      const create_date = Number(
+        recordDate.getFullYear().toString() +
+          (recordDate.getMonth() + 1).toString().padStart(2, "0") +
+          recordDate.getDate().toString().padStart(2, "0") +
+          recordDate.getHours().toString().padStart(2, "0") +
+          recordDate.getMinutes().toString().padStart(2, "0")
+      );
 
+      // 基本的轉換結果
+      const baseRecord: VitalSignRecord = {
+        signId: item.signId?.toString(),
+        userId: item.userId?.toString(),
+        patientId: item.patientId?.toString(),
+        vitalTypeId: Number(item.vitalTypeId),
+        create_date,
+        comment: item.comment || "",
+      };
+
+      // 根據 vitalTypeId 設定對應的數值欄位
+      switch (Number(item.vitalTypeId)) {
+        case 1: // 血糖
+          baseRecord.bloodSugar = Number(item.value);
+          // 如果後端有提供 period 資訊，可以在這裡設定
+          // baseRecord.period = item.period || "";
+          break;
+        case 2: // 收縮壓
+          baseRecord.systolic = Number(item.value);
+          break;
+        case 3: // 舒張壓
+          baseRecord.diastolic = Number(item.value);
+          break;
+        case 4: // 心跳
+          baseRecord.heartRate = Number(item.value);
+          break;
+        case 5: // 血氧
+          baseRecord.bloodO2 = Number(item.value);
+          break;
+        case 6: // 體重
+          baseRecord.weight = Number(item.value);
+          break;
+      }
+
+      return baseRecord;
+    });
+  };
   const createVitalSign = async (record: Omit<VitalSignRecord, "signId">) => {
     try {
       const response = await axios.post(
-        `${API_URL}/api/vitalSign/create`,
+        `http://localhost:3001/api/vitalSign/create`,
         record
       );
 
       const data = response.data as {
         success: boolean;
         signId?: string;
+        message?: string;
         err?: string;
       };
 
       if (data.success) {
-        return data.signId;
+        return {
+          signId: data.signId,
+          message: data.message || "新增成功",
+        };
       } else {
         setError(data.err || "Failed to create record");
         return null;
@@ -215,8 +239,8 @@ const VitalSignsPage: React.FC = () => {
     comment: string;
   }) => {
     try {
-      const response = await axios.put(
-        `${API_URL}/api/vitalSign/update`,
+      const response = await axios.post(
+        `http://localhost:3001/api/vitalSign/update`,
         record
       );
 
@@ -236,10 +260,12 @@ const VitalSignsPage: React.FC = () => {
 
   const deleteVitalSign = async (signId: string) => {
     try {
-      const response = await axios.post(`${API_URL}/api/vitalSign/delete`, {
-        signId,
-      });
-
+      const response = await axios.post(
+        `http://localhost:3001/api/vitalSign/delete`,
+        {
+          signId,
+        }
+      );
       const data = response.data as { success: boolean; err?: string };
       if (data.success) {
         return true;
@@ -271,10 +297,6 @@ const VitalSignsPage: React.FC = () => {
   const isFormValid = (): true | string => {
     if (!newRecord.vitalTypeId) return "請選擇類別";
 
-    if (newRecord.vitalTypeId === "1" && !newRecord.period) {
-      return "請選擇時段";
-    }
-
     if (!newRecord.value) {
       return "請輸入數值";
     }
@@ -291,15 +313,15 @@ const VitalSignsPage: React.FC = () => {
     }
 
     // Format date and time for API
-    const currentDate = dayjs();
-    const create_date = currentDate.format("YYYY-MM-DD");
-    const time = currentDate.format("HH:mm");
+    const create_date = newRecord.create_date || dayjs().format("YYYY-MM-DD");
+    const time = newRecord.time || dayjs().format("HH:mm");
 
     // Prepare record for API
     const recordToCreate: any = {
-      userId,
-      patientId: patientId,
+      userId: Number(userId),
+      patientId: Number(patientId),
       vitalTypeId: Number(newRecord.vitalTypeId),
+      value: Number(newRecord.value), // 後端使用統一的 value 欄位
       create_date,
       time,
       comment: newRecord.comment,
@@ -309,8 +331,7 @@ const VitalSignsPage: React.FC = () => {
     switch (newRecord.vitalTypeId) {
       case "1": // 血糖
         recordToCreate.bloodSugar = Number(newRecord.value);
-        // Store period for frontend display (this is not in the API)
-        recordToCreate.period = newRecord.period;
+
         break;
       case "2": // 收縮壓
         recordToCreate.systolic = Number(newRecord.value);
@@ -332,21 +353,27 @@ const VitalSignsPage: React.FC = () => {
     // Send to API and update UI
     const newId = await createVitalSign(recordToCreate);
     if (newId) {
-      // Format the record for our UI with the format we use internally
-      const uiRecord: VitalSignRecord = {
-        signId: newId,
-        userId,
-        patientId: patientId,
+      setSuccessMessage(newId.message);
+      setNewRecordId(newId.signId ?? null);
+      setShowSuccessPopup(true);
+      await fetchVitalSigns();
+
+      // Create UI record object
+      const uiRecord: any = {
+        id: newId,
+        userId: Number(userId),
+        patientId: Number(patientId),
         vitalTypeId: Number(newRecord.vitalTypeId),
-        create_date: Number(currentDate.format("YYYYMMDDHHmm")),
+        value: Number(newRecord.value),
         comment: newRecord.comment,
+        create_date: dayjs().format("YYYY-MM-DD"),
+        time: dayjs().format("HH:mm"),
       };
 
       // Add type-specific data
       switch (Number(newRecord.vitalTypeId)) {
         case 1:
           uiRecord.bloodSugar = Number(newRecord.value);
-          uiRecord.period = newRecord.period;
           break;
         case 2:
           uiRecord.systolic = Number(newRecord.value);
@@ -369,7 +396,6 @@ const VitalSignsPage: React.FC = () => {
 
       // Reset form
       setNewRecord({
-        period: "",
         value: "",
         comment: "",
         vitalTypeId: "",
@@ -386,6 +412,13 @@ const VitalSignsPage: React.FC = () => {
     setShowDeletePopup(true);
   };
 
+  const handleSuccessConfirm = async () => {
+    setShowSuccessPopup(false);
+    setNewRecordId(null);
+
+    // 重新獲取數據
+    await fetchVitalSigns();
+  };
   const handleDelete = async () => {
     if (!recordToDelete) return;
 
@@ -434,11 +467,6 @@ const VitalSignsPage: React.FC = () => {
     // Validate the edit form
     if (!editRecord.vitalTypeId) {
       alert("請選擇類別");
-      return;
-    }
-
-    if (editRecord.vitalTypeId === 1 && !editRecord.period) {
-      alert("請選擇時段");
       return;
     }
 
@@ -549,7 +577,6 @@ const VitalSignsPage: React.FC = () => {
                   ...newRecord,
                   vitalTypeId: e.target.value,
                   value: "",
-                  period: "",
                 })
               }
             >
@@ -593,21 +620,6 @@ const VitalSignsPage: React.FC = () => {
             >
               {loading ? "處理中..." : "新增"}
             </button>
-
-            {/* 選擇時段（僅在選擇血糖時顯示） */}
-            {newRecord.vitalTypeId === "1" && (
-              <select
-                className="p-2 border rounded font-semibold text-blue-500 dark:text-blue-400"
-                value={newRecord.period}
-                onChange={(e) =>
-                  setNewRecord({ ...newRecord, period: e.target.value })
-                }
-              >
-                <option hidden>選擇時段</option>
-                <option value="飯前">飯前</option>
-                <option value="飯後">飯後</option>
-              </select>
-            )}
           </div>
         </div>
 
@@ -621,33 +633,74 @@ const VitalSignsPage: React.FC = () => {
                 key={record.signId}
                 className="p-4 bg-white shadow rounded-lg border border-gray-200 flex justify-between items-center"
               >
-                <div>
-                  <p className="text-lg font-bold text-gray-800">
-                    {idToCategory[String(record.vitalTypeId)] || "未知類別"}
-                    {record.vitalTypeId === 1 &&
-                      ` - ${record.period || "未知時段"}`}
-                    {` ${formatCreateDate(record.create_date)} - ${getDisplayValue(record)} ${getUnit(record.vitalTypeId)}`}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    備註: {record.comment || "無"}
-                  </p>
-                </div>
-                <div className="flex space-x-2">
-                  {/* 編輯icon */}
-                  <button onClick={() => openEdit(record)} title="編輯">
-                    <Pencil className="w-8 h-8 text-blue-500 hover:text-blue-700" />
-                  </button>
-                  {/* 刪除icon */}
-                  <button
-                    onClick={() => confirmDelete(record.signId!)}
-                    title="刪除"
-                  >
-                    <Trash2 className="w-8 h-8 text-red-500 hover:text-red-700" />
-                  </button>
-                </div>
+                {
+                  <>
+                    <div>
+                      <p className="text-lg font-bold text-gray-800">
+                        {idToCategory[String(record.vitalTypeId)] || "未知類別"}
+                        {` ${formatCreateDate(record.create_date)} - ${getDisplayValue(record)} ${getUnit(record.vitalTypeId)}`}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        備註: {record.comment || "無"}
+                      </p>
+                    </div>
+                    <div className="flex space-x-2">
+                      {/* 編輯icon */}
+                      <button onClick={() => openEdit(record)} title="編輯">
+                        <Pencil className="w-8 h-8 text-blue-500 hover:text-blue-700" />
+                      </button>
+                      {/* 刪除icon */}
+                      <button
+                        onClick={() => confirmDelete(record.signId!)}
+                        title="刪除"
+                      >
+                        <Trash2 className="w-8 h-8 text-red-500 hover:text-red-700" />
+                      </button>
+                    </div>
+                  </>
+                }
               </li>
             ))}
           </ul>
+        )}
+        {/* Success Popup */}
+        {showSuccessPopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-8 h-8 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  新增成功！
+                </h3>
+                <p className="text-gray-600 mb-4">{successMessage}</p>
+                {newRecordId && (
+                  <p className="text-sm text-gray-500 mb-4">
+                    記錄 ID: {newRecordId}
+                  </p>
+                )}
+                <button
+                  className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                  onClick={handleSuccessConfirm}
+                >
+                  確認
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Delete Confirmation Modal */}
@@ -690,7 +743,6 @@ const VitalSignsPage: React.FC = () => {
                     setEditRecord({
                       ...editRecord,
                       vitalTypeId: newTypeId,
-                      period: "",
                       bloodSugar: undefined,
                       systolic: undefined,
                       diastolic: undefined,
@@ -822,21 +874,6 @@ const VitalSignsPage: React.FC = () => {
                     setEditRecord({ ...editRecord, comment: e.target.value })
                   }
                 />
-
-                {/* 血糖時段 */}
-                {editRecord.vitalTypeId === 1 && (
-                  <select
-                    className="text-emerald-800 w-full p-2 border rounded"
-                    value={editRecord.period || ""}
-                    onChange={(e) =>
-                      setEditRecord({ ...editRecord, period: e.target.value })
-                    }
-                  >
-                    <option hidden>選擇時段</option>
-                    <option value="飯前">飯前</option>
-                    <option value="飯後">飯後</option>
-                  </select>
-                )}
 
                 {/* 時間 */}
                 <LocalizationProvider dateAdapter={AdapterDayjs}>

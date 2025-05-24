@@ -1,11 +1,21 @@
 import mysqlConnectionPool from "../../../src/lib/mysql";
 import { NextApiRequest, NextApiResponse } from "next";
 import { RowDataPacket } from "mysql2";
+// import { middleware } from "../../../src/middleware";
+// import { handleCors } from "../../../src/cors";
 
 const getPatientVitalSigns = async (
   req: NextApiRequest,
   res: NextApiResponse
 ) => {
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    return res.status(200).end();
+  }
   if (req.method !== "GET") {
     return res.status(405).json({ success: false, err: "Method Not Allowed" });
   }
