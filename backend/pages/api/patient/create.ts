@@ -1,4 +1,3 @@
-
 // For Next.js
 import { NextApiRequest, NextApiResponse} from 'next';
 // For MySQL2
