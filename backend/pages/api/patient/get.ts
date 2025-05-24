@@ -123,4 +123,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 //    return getPatient(req, res);
 //  }
 //  return res.status(405).json({ success: false, message: 'Method Not Allowed' });
-
