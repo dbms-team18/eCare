@@ -10,7 +10,7 @@ import { usePatient } from "@/contexts/DashboardPatientContext";
 import { useEffect, useState } from "react";
 
 interface Patient {
-  id: number;
+  patientId: number;
   name: string;
   idNum: string;
   age: number;
@@ -48,7 +48,7 @@ export default function ProfilePage() {
   }, []);
 
   const handleSubmit = () => {
-    const selected = patients.find((p) => String(p.id) === selectedId);
+    const selected = patients.find((p) => String(p.patientId) === selectedId);
     if (selected) {
       setPatient({ id: Number(selected.id), name: selected.name });
       localStorage.setItem("currentPatient", JSON.stringify(selected));
@@ -86,17 +86,18 @@ export default function ProfilePage() {
             <>
               {patients.length > 0 ? (
                 <div className="space-y-4 mb-6">
-                  {patients.map((p) => (
+                  {patients.map((p) => {
+                  return(
                     <label
-                      key={p.id}
+                      key={p.patientId}
                       className="flex items-center gap-3 border border-gray-300 rounded-lg p-4 hover:bg-blue-50 cursor-pointer transition-all"
                     >
                       <input
                         type="radio"
                         name="selectedPatient"
-                        value={p.id}
-                        checked={selectedId === String(p.id)}
-                        onChange={() => setSelectedId(String(p.id))}
+                        value={p.patientId}
+                        checked={selectedId === String(p.patientId)}
+                        onChange={() => setSelectedId(String(p.patientId))}
                         className="accent-blue-500"
                       />
                       <div>
@@ -109,7 +110,7 @@ export default function ProfilePage() {
                         </div>
                       </div>
                     </label>
-                  ))}
+                  )})}
                 </div>
               ) : (
                 <div className="text-center py-8 mb-6">

@@ -15,7 +15,7 @@ const createVitalSign = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, err: "Method Not Allowed" });
   }
-
+// 要接收的封包格式
   const {
     userId,
     patientId,
