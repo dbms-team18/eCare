@@ -58,10 +58,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   //const { userId, patientId } = req.query;
   
-   //檢查patientId是否傳入 
-  if (!patientId) {
-    return res.status(400).json({ success: false, message: '缺少 patientId 參數' });
-  }
+  //檢查patientId是否傳入 
+  //if (!patientId) {
+  //  return res.status(400).json({ success: false, message: '缺少 patientId 參數' });
+  //}
 
   try {
     const connection = await mysqlConnectionPool.getConnection();
