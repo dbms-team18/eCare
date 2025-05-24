@@ -2,9 +2,10 @@
 // For Next.js
 import { NextApiRequest, NextApiResponse} from 'next';
 // For MySQL2
-//import ReselutSetHeader from 'mysql2/promise';
+import { ResultSetHeader } from 'mysql2/promise';
 import PatientData from 'mysql2'; //..?
 import mysqlConnectionPool from '../../../src/lib/mysql';
+import { parse } from 'cookie';
 
 // Type for the patient data
 type PatientData = {
@@ -58,21 +59,42 @@ async function createPatient(patientData: PatientData): Promise<number> {
         patientData.userId || null, // lastUpdId
         false  // Using 0 or false for isArchived
       ]
-    );
+    ) as [ResultSetHeader, unknown];
 
     // Return the ID of the newly created patient
-    return (result as any).insertId;
+    return result.insertId;
   }
 
   
 
 // Main API handler
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
+  // 跨域設定
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+  }
+
+  // 從 cookie 取得 uid
+  const cookieHeader = req.headers.cookie;
+  const cookies = cookieHeader ? parse(cookieHeader) : {};
+  const uid = cookies.uid;
+
+  // 檢查 uid 是否存在
+   if (!uid) {
+   return res.status(401).json({ success: false, message: '未登入或缺少 uid cookie' });
+   }
     try {
       // Parse the request body
-   
-      const {
-       
+      const { 
         name,
         age,
         gender,
@@ -86,7 +108,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         lastUpdId, 
         isArchived,
       } = req.body;
-
 
     // Validate required fields
     if (!name || !age || !gender || !addr || !idNum || !nhCardNum) {
