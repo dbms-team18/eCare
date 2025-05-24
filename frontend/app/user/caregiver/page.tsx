@@ -5,7 +5,7 @@ import Button from "../../../components/Button";
 import UserInfoHeader from "../../../components/UserInfoHeader";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BiUser, BiPlus, BiArrowBack } from "react-icons/bi";
+import { BiUser, BiPlus, BiEdit } from "react-icons/bi";
 import { usePatient } from "@/contexts/DashboardPatientContext";
 import { useEffect, useState } from "react";
 
@@ -125,6 +125,16 @@ export default function ProfilePage() {
 
           {/* 功能按鈕 */}
           <div className="flex flex-col items-center space-y-3">
+
+            {patients.length > 0 && (
+              <Button
+                label="修改資料"
+                icon={BiEdit}
+                className="w-full"
+                onClick={() => router.push("/patient/modify")}
+              />
+            )}
+            
             <Button
               label="新增病患"
               icon={BiPlus}
