@@ -70,9 +70,11 @@ export const login = async (req: NextApiRequest, res: NextApiResponse) => {
       res.setHeader('Access-Control-Allow-Credentials', 'true');
       res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000'); // 前端 
 
-      res.setHeader('Set-Cookie', `uid=${user.userId}; Max-Age=43200; Path=/; HttpOnly; SameSite=Lax`);
-
-
+      res.setHeader('Set-Cookie', [
+        `uid=${user.userId}; Max-Age=43200; Path=/; HttpOnly; SameSite=Lax`,
+        `role=${user.role}; Max-Age=43200; Path=/; HttpOnly; SameSite=Lax`
+      ]);
+      
       return res.status(200).json({
         success: true,
         message: '登入成功',
