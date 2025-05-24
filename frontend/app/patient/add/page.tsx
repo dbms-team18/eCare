@@ -18,18 +18,69 @@ export default function AddPatientPage() {
   const [info, setNotes] = useState('')
   const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log({
-      name, age, gender, addr,
-      idNum, nhCardNum,
-      emerName, emerPhone, info
-    })
-    alert('資料已送出（模擬）')
-    setTimeout(() => {
-        router.push('/user/caregiver')
-      }, 500)
+//replace the handleSubmit function with backend connection
+// Add this new function to call your backend
+const createPatient = async (patientData: any) => {
+  try {
+    const response = await fetch('/api/patient/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(patientData)
+    });
+
+    const result = await response.json();
+    
+    if (result.success) {
+      alert('病患資料新增成功！');
+      setTimeout(() => {
+        router.push('/user/caregiver');
+      }, 500);
+    } else {
+      alert('新增失敗：' + result.message);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('網路錯誤，請稍後再試');
   }
+};
+
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  // Map form fields to your backend API format
+  const patientData = {
+    userId: 1, // You'll need to get this from your auth system
+    name: name,
+    age: parseInt(age),
+    gender: gender === '男' ? 'male' : 'female', // Convert to English
+    addr: addr,
+    idNum: idNum,
+    nhCardNum: nhCardNum,
+    emerName: emerName,
+    emerPhone: emerPhone,
+    info: info,
+    lastUpdId: 1, // You'll need to get this from your auth system
+    isArchived: false
+  };
+
+  // Call your backend API
+  createPatient(patientData);
+};
+
+  //const handleSubmit = (e: React.FormEvent) => { //here??
+  //  e.preventDefault()
+  //  console.log({
+  //    name, age, gender, addr,
+  //    idNum, nhCardNum,
+  //    emerName, emerPhone, info
+  //  })
+  //  alert('資料已送出（模擬）')
+  //  setTimeout(() => {
+  //      router.push('/user/caregiver')
+  //    }, 500)
+  //}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#d6f5f0] px-4">
