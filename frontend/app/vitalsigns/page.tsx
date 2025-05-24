@@ -152,6 +152,7 @@ const VitalSignsPage: React.FC = () => {
   // 資料轉換函數
   const transformApiDataToFrontend = (apiData: any[]): VitalSignRecord[] => {
     return apiData.map((item) => {
+      
       // 轉換 recordDateTime 到 create_date (YYYYMMDDHHmm 格式)
       const recordDate = new Date(item.recordDateTime);
       const create_date = Number(
@@ -360,7 +361,7 @@ const VitalSignsPage: React.FC = () => {
 
       // Create UI record object
       const uiRecord: any = {
-        id: newId,
+        signId: newId.signId || '',
         userId: Number(userId),
         patientId: Number(patientId),
         vitalTypeId: Number(newRecord.vitalTypeId),
@@ -392,7 +393,6 @@ const VitalSignsPage: React.FC = () => {
           break;
       }
 
-      setRecords([uiRecord, ...records]);
 
       // Reset form
       setNewRecord({
@@ -628,12 +628,12 @@ const VitalSignsPage: React.FC = () => {
           <div className="text-center py-4">載入中...</div>
         ) : (
           <ul className="space-y-4">
-            {records.map((record) => (
-              <li
-                key={record.signId}
-                className="p-4 bg-white shadow rounded-lg border border-gray-200 flex justify-between items-center"
-              >
-                {
+            {records.map((record) => {
+              return (
+                <li
+                  key={record.signId}
+                  className="p-4 bg-white shadow rounded-lg border border-gray-200 flex justify-between items-center"
+                >
                   <>
                     <div>
                       <p className="text-lg font-bold text-gray-800">
@@ -658,9 +658,10 @@ const VitalSignsPage: React.FC = () => {
                       </button>
                     </div>
                   </>
-                }
-              </li>
-            ))}
+                </li>
+              );
+            })}
+
           </ul>
         )}
         {/* Success Popup */}
