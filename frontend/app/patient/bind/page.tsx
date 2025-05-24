@@ -6,17 +6,17 @@ import UserInfoHeader from '../../../components/UserInfoHeader'
 import Button from '../../../components/Button'
 
 export default function BindPatientPage() {
-  const [idNumber, setIdNumber] = useState('')
+  const [idNum, setIdNumber] = useState('')
   const [bindResult, setBindResult] = useState<'success' | 'fail' | null>(null)
   const router = useRouter()
   const handleVerify = () => {
-    if (!idNumber) {
+    if (!idNum) {
       alert('請輸入病患身分證字號')
       return
     }
 
     // 模擬驗證邏輯：輸入1234為成功，其餘都失敗
-    if (idNumber === '1234') {
+    if (idNum === '1234') {
       setBindResult('success')
     } else {
       setBindResult('fail')
@@ -37,7 +37,7 @@ export default function BindPatientPage() {
             <label className="block mb-2 text-gray-700">病患身分證字號:</label>
             <input
               type="text"
-              value={idNumber}
+              value={idNum}
               onChange={(e) => setIdNumber(e.target.value)}
               className="w-full border border-gray-300 rounded px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
               placeholder="請輸入病患身分證字號"
