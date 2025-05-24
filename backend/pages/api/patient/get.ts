@@ -1,6 +1,8 @@
+//final
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { RowDataPacket } from 'mysql2';
 import mysqlConnectionPool from '../../../src/lib/mysql';
+import { parse } from 'cookie';
 
 interface PatientRow extends RowDataPacket {
   id: number;
@@ -18,15 +20,45 @@ interface PatientRow extends RowDataPacket {
   lastUpdId: number;
   userId: number;
 }
-
-export const getPatient = async (req: NextApiRequest, res: NextApiResponse) => {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ success: false, message: 'Method Not Allowed' });
-  }
-
-  const { userId, patientId } = req.query;
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    //跨域設定
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   
-  // 檢查是否傳入 patientId
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      return res.status(200).end();
+    }
+  
+    if (req.method !== 'GET') {
+      return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+    }
+  
+    //從 cookie 取 uid
+    const cookieHeader = req.headers.cookie;
+    const cookies = cookieHeader ? parse(cookieHeader) : {};
+    const uid = cookies.uid;
+  
+    if (!uid) {
+      return res.status(401).json({ success: false, message: '未登入或缺少 uid cookie' });
+    }
+  
+    const { userId, patientId } = req.query;
+    
+    //檢查patientId是否傳入 
+    if (!patientId) {
+      return res.status(400).json({ success: false, message: '缺少 patientId 參數' });
+    }
+
+//export const getPatient = async (req: NextApiRequest, res: NextApiResponse) => {
+//  if (req.method !== 'GET') {
+//    return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+//  }
+
+  //const { userId, patientId } = req.query;
+  
+   //檢查patientId是否傳入 
   if (!patientId) {
     return res.status(400).json({ success: false, message: '缺少 patientId 參數' });
   }
@@ -76,18 +108,19 @@ export const getPatient = async (req: NextApiRequest, res: NextApiResponse) => {
     } finally {
       connection.release();
     }
-  } catch (err: any) {
+  } catch (err) {
     console.error('Get patient error:', err);
+    const errorMessage = err instanceof Error ? err.message : '未知錯誤';
     return res.status(500).json({ 
       success: false, 
-      message: `內部錯誤: ${err.message}` 
+      message: `內部錯誤: ${errorMessage}` 
     });
   }
 };
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
-    return getPatient(req, res);
-  }
-  return res.status(405).json({ success: false, message: 'Method Not Allowed' });
-}
+//export default function handler(req: NextApiRequest, res: NextApiResponse) {
+//  if (req.method === 'GET') {
+//    return getPatient(req, res);
+//  }
+//  return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+
