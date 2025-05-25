@@ -18,7 +18,7 @@ export default function AddPatientPage() {
   const [info, setNotes] = useState("");
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log({
       name,
@@ -31,10 +31,42 @@ export default function AddPatientPage() {
       emerPhone,
       info,
     });
-    alert("資料已送出（模擬）");
-    setTimeout(() => {
-      router.push("/user/caregiver");
-    }, 500);
+
+    // Prepare the patient data to send
+    const patientData = {
+      name,
+      age,
+      gender,
+      addr,
+      idNum,
+      nhCardNum,
+      emerName,
+      emerPhone,
+      info,
+    };
+
+    try {
+      const response = await fetch("http://localhost:3001/api/patient/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(patientData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert("資料已成功送出");
+        router.push("/user/caregiver"); // 送出後跳轉到指定頁面
+      } else {
+        alert(`錯誤: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("資料送出失敗");
+    }
   };
 
   return (

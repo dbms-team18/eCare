@@ -61,6 +61,9 @@ const handleModify = () =>{
     const selected = patients.find((p) => String(p.patientId) === selectedId);
     if (selected) {
       setPatient({ patientId: Number(selected.patientId), name: selected.name });
+      console.log("Selected ID:", selectedId);
+      console.log("Selected Patient:", selected);
+
       localStorage.setItem("currentPatient", JSON.stringify(selected));
       router.push("/dashboard");
       alert(`已切換至個案：${selected.name}`);

@@ -5,7 +5,7 @@ import mysqlConnectionPool from '../../../src/lib/mysql';
 import { parse } from 'cookie';
 
 interface PatientRow extends RowDataPacket {
-  id: number;
+  patientId: number;
   name: string;
   age: number;
   gender: string;
@@ -73,15 +73,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const patients = await getAllPatients(targetUserId);
-    
-    // If no patients found
-    if (patients.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        message: '沒有找到病患資料' 
-      });
-    }
-    
+
+    // 修改：即使沒有病患資料也返回200狀態碼和空陣列
+    console.log(
+      `查詢到 ${patients.length} 筆病患資料，用戶ID: ${targetUserId}`
+    );
+
     // 回傳查詢結果
     return res.status(200).json({
       success: true,
