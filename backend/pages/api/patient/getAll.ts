@@ -1,10 +1,11 @@
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { RowDataPacket } from 'mysql2';
 import mysqlConnectionPool from '../../../src/lib/mysql';
 import { parse } from 'cookie';
 
 interface PatientRow extends RowDataPacket {
-  id: number;
+  patientId: number;
   name: string;
   age: number;
   gender: string;
@@ -27,8 +28,8 @@ async function getAllPatients(userId: number): Promise<PatientRow[]> {
   try {
     // 查詢病患資料
     const [patients] = await connection.execute<PatientRow[]>(
-      'SELECT * FROM patient WHERE userId = ? ORDER BY lastUpd DESC',
-      [userId]
+      'SELECT * FROM patient WHERE userId = ? OR familyId = ? ORDER BY lastUpd DESC',
+      [userId, userId]
     );
     
     return patients;
@@ -72,15 +73,12 @@ if (!uid) {
 
   try {
     const patients = await getAllPatients(targetUserId);
-    
-    // If no patients found
-    if (patients.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        message: '沒有找到病患資料' 
-      });
-    }
-    
+
+    // 修改：即使沒有病患資料也返回200狀態碼和空陣列
+    console.log(
+      `查詢到 ${patients.length} 筆病患資料，用戶ID: ${targetUserId}`
+    );
+
     // 回傳查詢結果
     return res.status(200).json({
       success: true,

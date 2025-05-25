@@ -1,4 +1,3 @@
-//final
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { RowDataPacket } from 'mysql2';
 import mysqlConnectionPool from '../../../src/lib/mysql';
@@ -123,4 +122,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 //    return getPatient(req, res);
 //  }
 //  return res.status(405).json({ success: false, message: 'Method Not Allowed' });
-

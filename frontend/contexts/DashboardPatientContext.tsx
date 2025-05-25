@@ -5,19 +5,19 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 type PatientContextType = {
   patientName: string;
   patientId: number;
-  setPatient: (patient: { name: string; id: number }) => void;
+  setPatient: (patient: { name: string; patientId: number }) => void;
 };
 
 const PatientContext = createContext<PatientContextType | null>(null);
 
 export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [patientName, setPatientName] = useState<string>('');
-  const [patientId, setPatientId] = useState<number>(0);
+  const [patientId, setPatientId] = useState<number | null>(null);
 
   // 新增 setter 函式，提供更新能力
-  const setPatient = (patient: { name: string; id: number }) => {
+  const setPatient = (patient: { name: string; patientId: number }) => {
     setPatientName(patient.name);
-    setPatientId(patient.id);
+    setPatientId(patient.patientId);
     localStorage.setItem('currentPatient', JSON.stringify(patient));
   };
 
@@ -28,7 +28,8 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({ child
       try {
         const parsed = JSON.parse(raw);
         setPatientName(parsed.name || '');
-        setPatientId(parsed.id || 0);
+        setPatientId(parsed.patientId || 0);
+        console.log("PatientId =" + parsed.patientId+"PatientName =" + parsed.name)
       } catch (e) {
         console.error('PatientContext: 無法解析 currentPatient', e);
       }
@@ -36,7 +37,10 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   return (
-    <PatientContext.Provider value={{ patientName, patientId, setPatient }}>
+    <PatientContext.Provider value={{ 
+      patientName, 
+      patientId, 
+      setPatient }}>
       {children}
     </PatientContext.Provider>
   );

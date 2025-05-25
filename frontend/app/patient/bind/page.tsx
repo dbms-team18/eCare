@@ -4,23 +4,48 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import UserInfoHeader from '../../../components/UserInfoHeader'
 import Button from '../../../components/Button'
+import {useUser} from '@/contexts/DashboardUserContext'
 
 export default function BindPatientPage() {
   const [idNum, setIdNumber] = useState('')
   const [bindResult, setBindResult] = useState<'success' | 'fail' | null>(null)
-  const router = useRouter()
-  const handleVerify = () => {
+  const router = useRouter();
+  const {userId} = useUser();
+
+  const handleVerify = async () => {
+
     if (!idNum) {
       alert('請輸入病患身分證字號')
       return
     }
+    
+    try {
+    const response = await fetch('http://localhost:3001/api/patient/bind', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // 後端驗證 cookie
+      body: JSON.stringify({
+        idNum,
+        userId, 
+      }),
+    });
 
-    // 模擬驗證邏輯：輸入1234為成功，其餘都失敗
-    if (idNum === '1234') {
-      setBindResult('success')
-    } else {
-      setBindResult('fail')
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      setBindResult('fail');
+      alert(result.message || '綁定失敗');
+      return;
     }
+
+    setBindResult('success')
+    alert('綁定成功！');
+
+  } catch (err) {
+    console.error('綁定請求失敗:', err);
+    setBindResult('fail')
+    alert('發送綁定請求時發生錯誤');
+  }
   }
 
   return (
@@ -44,7 +69,7 @@ export default function BindPatientPage() {
             />
           </div>
 
-          <Button label="驗證" className="w-full" onClick={handleVerify} />
+          <Button label="綁定驗證" className="w-full" onClick={handleVerify} />
         </div>
       </div>
 
@@ -52,16 +77,6 @@ export default function BindPatientPage() {
       {bindResult && (
         <div className="fixed inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white border border-gray-300 rounded-xl shadow-lg w-full max-w-xs">
-            {/* 頂部視窗列 */}
-            <div className="flex justify-between items-center px-3 py-1 bg-gray-100 rounded-t-xl border-b border-gray-300">
-              <div className="flex gap-1">
-                <div className={`w-3 h-3 ${bindResult === 'success' ? 'bg-blue-400' : 'bg-red-400'} rounded-full`}></div>
-                <div className={`w-3 h-3 ${bindResult === 'success' ? 'bg-blue-300' : 'bg-red-300'} rounded-full`}></div>
-                <div className={`w-3 h-3 ${bindResult === 'success' ? 'bg-blue-200' : 'bg-red-200'} rounded-full`}></div>
-              </div>
-              <div className="text-xs text-gray-500">User_family</div>
-            </div>
-
             {/* 彈窗內容 */}
             <div className="p-6 text-center">
               {bindResult === 'success' ? (
@@ -75,12 +90,11 @@ export default function BindPatientPage() {
                   <p className="text-gray-700 mb-6">此身分證字號無法綁定病患</p>
                 </>
               )}
-                <button
+                <Button
+                    label = "返回"
                     onClick={() => router.push('/user/family')}
-                    className={`w-full ${bindResult === 'success' ? 'bg-pink-300 hover:bg-pink-400' : 'bg-red-300 hover:bg-red-400'} text-white font-semibold py-2 rounded transition`}
-                    >
-                    返回
-                </button>
+                    className="w-full border-2 border-[#1E40AF] text-[#1E40AF] hover:bg-[#1E40AF] hover:text-[#1E40AF]"
+                />
 
             </div>
           </div>

@@ -4,30 +4,65 @@
 import Button from '../../../components/Button'
 import UserInfoHeader from '../../../components/UserInfoHeader'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BiUser, BiPlus, BiArrowBack } from 'react-icons/bi'
+import { FaExchangeAlt } from "react-icons/fa";
 import { usePatient } from '@/contexts/DashboardPatientContext';
 
+interface Patient {
+  patientId: number;
+  name: string;
+  idNum: string;
+  age: number;
+}
 
 export default function ProfilePage() {
     const { setPatient } = usePatient();
     const router = useRouter()
-    const patients = [
-        { id: '1', name: '王小明', idNumber: 'F229123456', age: 70 },
-        { id: '2', name: '李阿姨', idNumber: 'F229654321', age: 83 },
-      ]
+    const [patients, setPatients] = useState<Patient[]>([]);
     const [selectedId, setSelectedId] = useState('')
+    const [isLoading, setIsLoading] = useState(true);
+
+useEffect(() => {
+    fetch("http://localhost:3001/api/patient/getAll", {
+      credentials: "include", // 加這行才能送出 cookie
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setPatients(data.data);
+          if (data.message) {
+            console.log(data.message);
+          }
+        } else {
+          alert(data.message || "病患資料載入失敗");
+        }
+      })
+      .catch((err) => {
+        console.error("錯誤:", err);
+        alert("連線失敗");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
+
 
     const handleSubmit = () => {
-        const selected = patients.find((p) => p.id === selectedId)
+        const selected = patients.find((p) => String(p.patientId) === selectedId)
         if (selected) {
-            setPatient({ id: Number(selected.id), name: selected.name });
+            setPatient({ patientId: Number(selected.patientId), name: selected.name });
+            console.log("Selected ID:", selectedId);
+            console.log("Selected Patient:", selected); 
             localStorage.setItem('currentPatient', JSON.stringify(selected)) // 先暫存
             router.push('/dashboard')
             alert(`已切換至個案：${selected.name}`)
             
         } else {
+            console.log("Selected ID:", selectedId);
+            console.log("Selected Patient:", selected);
             alert('請先選擇一位個案')
         }
       }
@@ -46,22 +81,24 @@ export default function ProfilePage() {
               <Link href="/" className="text-gray-600 hover:text-black text-2xl">
                 <BiArrowBack />
               </Link>
-              <h2 className="text-2xl font-bold">請選擇您要查看的個案</h2>
+              <h2 className="text-2xl font-bold">
+                請選擇您要查看的個案
+              </h2>
             </div>
 
             {/* 個案列表 */}
             <div className="space-y-4 mb-6">
               {patients.map((p) => (
                 <label
-                  key={p.id}
+                  key={p.patientId}
                   className="flex items-center gap-3 border border-gray-300 rounded-lg p-4 hover:bg-blue-50 cursor-pointer transition-all"
                 >
                   <input
                     type="radio"
                     name="selectedPatient"
-                    value={p.id}
-                    checked={selectedId === p.id}
-                    onChange={() => setSelectedId(p.id)}
+                    value={p.patientId}
+                    checked={selectedId === String(p.patientId)}
+                    onChange={() => setSelectedId(String(p.patientId))}
                     className="accent-blue-500"
                   />
                   <div>
@@ -70,7 +107,7 @@ export default function ProfilePage() {
                       <span className="font-semibold">{p.name}</span>
                     </div>
                     <div className="text-sm text-gray-600 mt-1">
-                      身分證：{p.idNumber.slice(-4)}｜年齡：{p.age}
+                      身分證：{p.idNum.slice(-4)}｜年齡：{p.age}
                     </div>
                   </div>
                 </label>
@@ -87,7 +124,7 @@ export default function ProfilePage() {
               />
               <Button
                 label="確認切換"
-                
+                icon={FaExchangeAlt}
                 className="w-full"
                 onClick={handleSubmit}
               />

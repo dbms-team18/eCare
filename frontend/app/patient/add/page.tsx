@@ -1,103 +1,91 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Button from '../../../components/Button'
-import { useRouter } from 'next/navigation'
-import { BiArrowBack } from 'react-icons/bi'
-import Link from 'next/link'
+import { useState } from "react";
+import Button from "../../../components/Button";
+import { useRouter } from "next/navigation";
+import { BiArrowBack } from "react-icons/bi";
+import Link from "next/link";
 
 export default function AddPatientPage() {
-  const [name, setName] = useState('')
-  const [age, setAge] = useState('')
-  const [gender, setGender] = useState('')
-  const [addr, setAddress] = useState('')
-  const [idNum, setIdNumber] = useState('')
-  const [nhCardNum, setInsuranceNumber] = useState('')
-  const [emerName, setEmergencyContact] = useState('')
-  const [emerPhone, setEmergencyPhone] = useState('')
-  const [info, setNotes] = useState('')
-  const router = useRouter()
-
-//replace the handleSubmit function with backend connection
-// Add this new function to call your backend
-const createPatient = async (patientData: any) => {
-  try {
-    const response = await fetch('/api/patient/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(patientData)
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+  const [gender, setGender] = useState("");
+  const [addr, setAddress] = useState("");
+  const [idNum, setIdNumber] = useState("");
+  const [nhCardNum, setInsuranceNumber] = useState("");
+  const [emerName, setEmergencyContact] = useState("");
+  const [emerPhone, setEmergencyPhone] = useState("");
+  const [info, setNotes] = useState("");
+  const router = useRouter();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log({
+      name,
+      age,
+      gender,
+      addr,
+      idNum,
+      nhCardNum,
+      emerName,
+      emerPhone,
+      info,
     });
 
-    const result = await response.json();
-    
-    if (result.success) {
-      alert('病患資料新增成功！');
-      setTimeout(() => {
-        router.push('/user/caregiver');
-      }, 500);
-    } else {
-      alert('新增失敗：' + result.message);
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    alert('網路錯誤，請稍後再試');
-  }
-};
+    // Prepare the patient data to send
+    const patientData = {
+      name,
+      age,
+      gender,
+      addr,
+      idNum,
+      nhCardNum,
+      emerName,
+      emerPhone,
+      info,
+    };
 
-const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  // Map form fields to your backend API format
-  const patientData = {
-    userId: 1, // You'll need to get this from your auth system
-    name: name,
-    age: parseInt(age),
-    gender: gender === '男' ? 'male' : 'female', // Convert to English
-    addr: addr,
-    idNum: idNum,
-    nhCardNum: nhCardNum,
-    emerName: emerName,
-    emerPhone: emerPhone,
-    info: info,
-    lastUpdId: 1, // You'll need to get this from your auth system
-    isArchived: false
+    try {
+      const response = await fetch("http://localhost:3001/api/patient/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(patientData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert("資料已成功送出");
+        router.push("/user/caregiver"); // 送出後跳轉到指定頁面
+      } else {
+        alert(`錯誤: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("資料送出失敗");
+    }
   };
 
-  // Call your backend API
-  createPatient(patientData);
-};
-
-  //const handleSubmit = (e: React.FormEvent) => { //here??
-  //  e.preventDefault()
-  //  console.log({
-  //    name, age, gender, addr,
-  //    idNum, nhCardNum,
-  //    emerName, emerPhone, info
-  //  })
-  //  alert('資料已送出（模擬）')
-  //  setTimeout(() => {
-  //      router.push('/user/caregiver')
-  //    }, 500)
-  //}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#d6f5f0] px-4">
       <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-xl">
         <form onSubmit={handleSubmit} className="space-y-4">
-    
-        {/* ←返回 + 標題 */}
-        <div className="flex items-center gap-2 mb-4 text-gray-800">
-          <Link href="/user/caregiver" className="text-gray-600 hover:text-black text-2xl">
-            <BiArrowBack />
-          </Link>
-          <h2 className="text-2xl font-bold">輸入病患資料</h2>
-        </div>
+          {/* ←返回 + 標題 */}
+          <div className="flex items-center gap-2 mb-4 text-gray-800">
+            <Link
+              href="/user/caregiver"
+              className="text-gray-600 hover:text-black text-2xl"
+            >
+              <BiArrowBack />
+            </Link>
+            <h2 className="text-2xl font-bold">輸入病患資料</h2>
+          </div>
 
           {/* 姓名、年齡、性別 */}
           <div className="flex flex-wrap gap-4">
-
             <div className="flex-1">
               <label className="block text-gray-700">姓名</label>
               <input
@@ -125,8 +113,8 @@ const handleSubmit = (e: React.FormEvent) => {
                   <input
                     type="radio"
                     value="男"
-                    checked={gender === '男'}
-                    onChange={() => setGender('男')}
+                    checked={gender === "男"}
+                    onChange={() => setGender("男")}
                   />
                   男
                 </label>
@@ -134,8 +122,8 @@ const handleSubmit = (e: React.FormEvent) => {
                   <input
                     type="radio"
                     value="女"
-                    checked={gender === '女'}
-                    onChange={() => setGender('女')}
+                    checked={gender === "女"}
+                    onChange={() => setGender("女")}
                   />
                   女
                 </label>
@@ -160,7 +148,7 @@ const handleSubmit = (e: React.FormEvent) => {
               <label className="block text-gray-700">身分證字號</label>
               <input
                 type="text"
-                value={idNum
+                value={idNum}
                 onChange={(e) => setIdNumber(e.target.value)}
                 className="w-full border border-gray-300 px-3 py-2 rounded text-gray-900"
               />
@@ -210,11 +198,10 @@ const handleSubmit = (e: React.FormEvent) => {
           </div>
 
           <div className="pt-2">
-            <Button label="確認送出" className="w-full" onClick={() => {}}/>
+            <Button label="確認送出" className="w-full" onClick={() => {}} />
           </div>
-
         </form>
       </div>
     </div>
-  )
+  );
 }
