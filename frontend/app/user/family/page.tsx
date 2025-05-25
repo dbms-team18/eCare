@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BiUser, BiPlus, BiArrowBack } from 'react-icons/bi'
+import { FaExchangeAlt } from "react-icons/fa";
 import { usePatient } from '@/contexts/DashboardPatientContext';
 
 interface Patient {
@@ -50,14 +51,18 @@ useEffect(() => {
 
 
     const handleSubmit = () => {
-        const selected = patients.find((p) => p.patientId === selectedId)
+        const selected = patients.find((p) => String(p.patientId) === selectedId)
         if (selected) {
             setPatient({ patientId: Number(selected.patientId), name: selected.name });
+            console.log("Selected ID:", selectedId);
+            console.log("Selected Patient:", selected); 
             localStorage.setItem('currentPatient', JSON.stringify(selected)) // 先暫存
             router.push('/dashboard')
             alert(`已切換至個案：${selected.name}`)
             
         } else {
+            console.log("Selected ID:", selectedId);
+            console.log("Selected Patient:", selected);
             alert('請先選擇一位個案')
         }
       }
@@ -76,7 +81,9 @@ useEffect(() => {
               <Link href="/" className="text-gray-600 hover:text-black text-2xl">
                 <BiArrowBack />
               </Link>
-              <h2 className="text-2xl font-bold">請選擇您要查看的個案</h2>
+              <h2 className="text-2xl font-bold">
+                請選擇您要查看的個案
+              </h2>
             </div>
 
             {/* 個案列表 */}
@@ -89,9 +96,9 @@ useEffect(() => {
                   <input
                     type="radio"
                     name="selectedPatient"
-                    value={p.id}
-                    checked={selectedId === p.id}
-                    onChange={() => setSelectedId(p.id)}
+                    value={p.patientId}
+                    checked={selectedId === String(p.patientId)}
+                    onChange={() => setSelectedId(String(p.patientId))}
                     className="accent-blue-500"
                   />
                   <div>
@@ -100,7 +107,7 @@ useEffect(() => {
                       <span className="font-semibold">{p.name}</span>
                     </div>
                     <div className="text-sm text-gray-600 mt-1">
-                      身分證：{p.idNumber.slice(-4)}｜年齡：{p.age}
+                      身分證：{p.idNum.slice(-4)}｜年齡：{p.age}
                     </div>
                   </div>
                 </label>
@@ -117,7 +124,7 @@ useEffect(() => {
               />
               <Button
                 label="確認切換"
-                
+                icon={FaExchangeAlt}
                 className="w-full"
                 onClick={handleSubmit}
               />
