@@ -28,8 +28,8 @@ async function getAllPatients(userId: number): Promise<PatientRow[]> {
   try {
     // 查詢病患資料
     const [patients] = await connection.execute<PatientRow[]>(
-      'SELECT * FROM patient WHERE userId = ? ORDER BY lastUpd DESC',
-      [userId]
+      'SELECT * FROM patient WHERE userId = ? OR familyId = ? ORDER BY lastUpd DESC',
+      [userId, userId]
     );
     
     return patients;
