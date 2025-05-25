@@ -47,25 +47,27 @@ export default function ProfilePage() {
       });
   }, []);
 
-const handleModify = () =>{
-  const selected = patients.find((p) => String(p.patientId) === selectedId);
-  if (!selected) {
-    alert("請先選擇一位個案");
-    return;
-  }
-  router.push(`/patient/modify?patientId=${selectedId}`);
-}
-
+  const handleModify = () => {
+    const selected = patients.find((p) => String(p.patientId) === selectedId);
+    if (!selected) {
+      alert("請先選擇一位個案");
+      return;
+    }
+    router.push(`/patient/modify?patientId=${selectedId}`);
+  };
 
   const handleSubmit = () => {
     const selected = patients.find((p) => String(p.patientId) === selectedId);
     if (selected) {
-      setPatient({ patientId: Number(selected.patientId), name: selected.name });
-      console.log("Selected ID:", selectedId);
-      console.log("Selected Patient:", selected);
+      setPatient({
+        patientId: Number(selected.patientId),
+        name: selected.name,
+      });
 
       localStorage.setItem("currentPatient", JSON.stringify(selected));
-      router.push("/dashboard");
+      router.push(
+        `/dashboard?userId=${userId}&patientId=${selected.patientId}`
+      );
       alert(`已切換至個案：${selected.name}`);
     } else {
       alert("請先選擇一位個案");
@@ -100,30 +102,31 @@ const handleModify = () =>{
               {patients.length > 0 ? (
                 <div className="space-y-4 mb-6">
                   {patients.map((p) => {
-                  return(
-                    <label
-                      key={p.patientId}
-                      className="flex items-center gap-3 border border-gray-300 rounded-lg p-4 hover:bg-blue-50 cursor-pointer transition-all"
-                    >
-                      <input
-                        type="radio"
-                        name="selectedPatient"
-                        value={p.patientId}
-                        checked={selectedId === String(p.patientId)}
-                        onChange={() => setSelectedId(String(p.patientId))}
-                        className="accent-blue-500"
-                      />
-                      <div>
-                        <div className="flex items-center gap-2 text-gray-900">
-                          <BiUser />
-                          <span className="font-semibold">{p.name}</span>
+                    return (
+                      <label
+                        key={p.patientId}
+                        className="flex items-center gap-3 border border-gray-300 rounded-lg p-4 hover:bg-blue-50 cursor-pointer transition-all"
+                      >
+                        <input
+                          type="radio"
+                          name="selectedPatient"
+                          value={p.patientId}
+                          checked={selectedId === String(p.patientId)}
+                          onChange={() => setSelectedId(String(p.patientId))}
+                          className="accent-blue-500"
+                        />
+                        <div>
+                          <div className="flex items-center gap-2 text-gray-900">
+                            <BiUser />
+                            <span className="font-semibold">{p.name}</span>
+                          </div>
+                          <div className="text-sm text-gray-600 mt-1">
+                            身分證：{p.idNum.slice(-4)}｜年齡：{p.age}
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-600 mt-1">
-                          身分證：{p.idNum.slice(-4)}｜年齡：{p.age}
-                        </div>
-                      </div>
-                    </label>
-                  )})}
+                      </label>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-8 mb-6">
@@ -139,7 +142,6 @@ const handleModify = () =>{
 
           {/* 功能按鈕 */}
           <div className="flex flex-col items-center space-y-3">
-
             {patients.length > 0 && (
               <Button
                 label="修改資料"
@@ -148,7 +150,7 @@ const handleModify = () =>{
                 onClick={handleModify}
               />
             )}
-            
+
             <Button
               label="新增病患"
               icon={BiPlus}

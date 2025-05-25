@@ -1,15 +1,18 @@
-import React from 'react';
-import VitalSignCard, { VitalSign } from './VitalSignCard';
+import React from "react";
+import VitalSignCard, { VitalSign } from "./VitalSignCard";
 
 type VitalSignsGridProps = {
   vitalSigns: VitalSign[];
   onAddRecord: (id: string) => void;
 };
 
-const VitalSignsGrid: React.FC<VitalSignsGridProps> = ({ vitalSigns, onAddRecord }) => {
+const VitalSignsGrid: React.FC<VitalSignsGridProps> = ({
+  vitalSigns,
+  onAddRecord,
+}) => {
   return (
-    <div className="col-span-9 grid grid-cols-2 gap-4"> 
-      {vitalSigns.map((vitalSign, index) => (
+    <div className="col-span-9 grid grid-cols-2 gap-4">
+      {vitalSigns.map((vitalSign) => (
         <VitalSignCard
           key={vitalSign.id}
           vitalSign={vitalSign}
@@ -19,6 +22,5 @@ const VitalSignsGrid: React.FC<VitalSignsGridProps> = ({ vitalSigns, onAddRecord
     </div>
   );
 };
-
 
 export default VitalSignsGrid;
