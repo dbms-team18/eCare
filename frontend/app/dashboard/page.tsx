@@ -1,32 +1,80 @@
 'use client';
 
+// 系統套件
 import React from 'react';
-// import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { RowDataPacket } from "mysql2";
+import { useEffect, useState } from 'react';
+
+
+// 專案元件
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
-import PatientInfo from '../../components/dashboard/PatientInfo';
 import VitalSignsGrid from '../../components/dashboard/VitalSignsGrid';
 // import { VitalSignRecord } from '@/types/api';
+import PatientInfo from '../../components/dashboard/PatientInfo';
 import { idToCategory,unitMap, iconMap} from '@/constants/vitalSignMap';
+import { useUser } from '@/contexts/DashboardUserContext';
+import { usePatient } from '@/contexts/DashboardPatientContext';
 
 export default function Dashboard() {
   const router = useRouter();
 
+
+//  準備要用來接收的 rowData
+ interface VitalSignRow extends RowDataPacket {
+  signId: number;
+  vitalTypeId: number;
+  value: number;
+  recordDateTime: Date;
+  comment: string;
+  status:number;
+}
+
+//  抓取要用的參數 userId, patientId
+const {userId}  = useUser();
+const {patientId, patientName}  = usePatient();
+
+
+//  即時更新 Dashboard
+  const [topVitalSign, settopVitalSign] = useState<VitalSignRow[]>([]);
+
+  useEffect(() => {
+    if (!userId || !patientId) return;
+      fetch(`http://localhost:3001/api/dashboard/getTopVitalSigns?userId=${userId}&patientId=${patientId}`, {
+      credentials: "include", // 加這行才能送出 cookie
+    })
+      .then((res) => res.json())
+      .then((data) => {
+          if (data.success) {
+            settopVitalSign(data.data);
+            console.log(data)
+            if (data.message) {
+              console.log(data.message);
+            }
+          } else {
+            alert(data.message || "Dashboard 載入失敗");
+          }
+      })
+      .catch((err) => {
+          console.error("錯誤:", err);
+          alert("連線失敗");
+      })
+      .finally(() => {
+      });
+    }, []);
+
+
+  // 主畫面顯示
   const patientData = {
-  name: '王小明',
-  message: '繼續保持！',
-  vitalSigns: [
-    { signID: '1', vitalTypeId: 1, value: 90, status: '正常' },
-    { signID: '4', vitalTypeId: 4, value: 80, status: '正常' },
-    { signID: '2', vitalTypeId: 2, value: 99, status: '正常' },
-    { signID: '3', vitalTypeId: 3, value: 100, status: '正常' },
-    { signID: '5', vitalTypeId: 5, value: 80, status: '正常' },
-    { signID: '6', vitalTypeId: 6, value: 90, status: '正常' },
-  ] as Array<{ signID: string; vitalTypeId: number; value: number; status: string }>,
+    name: patientName,
+    message: '繼續保持！',
+    vitalSigns: topVitalSign.map((row) => ({
+    signID: row.signId.toString(),
+    vitalTypeId: row.vitalTypeId,
+    value: row.value,
+    status: row.status === 1 ? '異常' : '正常',
+  })),
 };
-
-
-
 
 
   const handleAddRecord = (id: string) => {

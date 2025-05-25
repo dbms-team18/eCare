@@ -3,26 +3,26 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { RowDataPacket } from "mysql2";
 
 const getAllVitalSigns = async (req: NextApiRequest, res: NextApiResponse) => {
-  // 跨域處理
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000"); // 可以改成你的前端網址
-  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    // 跨域設定
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
 
-  // 預檢請求處理（OPTIONS）
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-  
-  
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      return res.status(200).end();
+    }
     if (req.method !== "GET") {
     return res.status(405).json({ success: false, err: "Method Not Allowed" });
   }
 
   interface VitalSignRow extends RowDataPacket {
+  signId: number;
   vitalTypeId: number;
   value: number;
   recordDateTime: Date;
   comment: string;
+  status:number;
 }
 
   const userId = parseInt(req.query.userId as string, 10);
@@ -49,7 +49,7 @@ const getAllVitalSigns = async (req: NextApiRequest, res: NextApiResponse) => {
          WHERE userId = ? AND patientId = ?
          GROUP BY vitalTypeId
        )
-       SELECT v.vitalTypeId, v.value, v.recordDateTime, v.comment
+       SELECT v.signId, v.vitalTypeId, v.value, v.recordDateTime, v.comment, v.status
        FROM vitalsigns v
        JOIN TOP_VITAL_SIGNS t
        ON v.vitalTypeId = t.vitalTypeId AND v.recordDateTime = t.maxTime
