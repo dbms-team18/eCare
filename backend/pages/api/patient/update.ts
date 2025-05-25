@@ -20,7 +20,7 @@ interface PatientRow extends RowDataPacket {
 }
 
 export const updatePatient = async (req: NextApiRequest, res: NextApiResponse) => {
-  if (req.method !== 'PUT') {
+  if (req.method !== 'POST') {
     return res.status(405).json({ success: false, message: 'Method Not Allowed' });
   }
 
@@ -29,12 +29,14 @@ export const updatePatient = async (req: NextApiRequest, res: NextApiResponse) =
     const {
       patientId,
       userId,
-      name,
-      age,
-      gender,
+      name, 
+      age, 
+      gender, 
       addr,
-      emerName,
-      emerPhone,
+      idNum, 
+      nhCardNum,
+      emerName, 
+      emerPhone, 
       info
     } = req.body;
     
@@ -66,6 +68,8 @@ export const updatePatient = async (req: NextApiRequest, res: NextApiResponse) =
            age = ?,
            gender = ?,
            addr = ?,
+           idNum = ?,
+           nhCardNum = ?,
            emerName = ?,
            emerPhone = ?,
            info = ?,
@@ -78,6 +82,8 @@ export const updatePatient = async (req: NextApiRequest, res: NextApiResponse) =
          age ? parseInt(age) : currentPatient.age,
          gender || currentPatient.gender,
          addr || currentPatient.addr,
+         idNum || currentPatient.idNum,
+         nhCardNum || currentPatient.nhCardNum,
          emerName || currentPatient.emerName,
          emerPhone || currentPatient.emerPhone,
          info !== undefined ? info : currentPatient.info,
@@ -132,7 +138,16 @@ export const updatePatient = async (req: NextApiRequest, res: NextApiResponse) =
 };
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'PUT') {
+  // 跨域設定
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(200).end();
+  }
+  if (req.method === 'POST') {
     return updatePatient(req, res);
   }
   return res.status(405).json({ success: false, message: 'Method Not Allowed' });

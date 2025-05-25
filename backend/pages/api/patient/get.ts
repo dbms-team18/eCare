@@ -1,4 +1,3 @@
-//final
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { RowDataPacket } from 'mysql2';
 import mysqlConnectionPool from '../../../src/lib/mysql';

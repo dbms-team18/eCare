@@ -4,8 +4,8 @@
 import Button from "../../../components/Button";
 import UserInfoHeader from "../../../components/UserInfoHeader";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { BiUser, BiPlus, BiEdit } from "react-icons/bi";
+import { FaExchangeAlt } from "react-icons/fa";
 import { usePatient } from "@/contexts/DashboardPatientContext";
 import { useEffect, useState } from "react";
 
@@ -47,14 +47,23 @@ export default function ProfilePage() {
       });
   }, []);
 
+const handleModify = () =>{
+  const selected = patients.find((p) => String(p.patientId) === selectedId);
+  if (!selected) {
+    alert("請先選擇一位個案");
+    return;
+  }
+  router.push(`/patient/modify?patientId=${selectedId}`);
+}
+
+
   const handleSubmit = () => {
     const selected = patients.find((p) => String(p.patientId) === selectedId);
-
-    console.log("Selected ID:", selectedId);
-    console.log("Selected Patient:", selected);
-
     if (selected) {
-      setPatient({ id: Number(selected.patientId), name: selected.name });
+      setPatient({ patientId: Number(selected.patientId), name: selected.name });
+      console.log("Selected ID:", selectedId);
+      console.log("Selected Patient:", selected);
+
       localStorage.setItem("currentPatient", JSON.stringify(selected));
       router.push("/dashboard");
       alert(`已切換至個案：${selected.name}`);
@@ -90,7 +99,8 @@ export default function ProfilePage() {
             <>
               {patients.length > 0 ? (
                 <div className="space-y-4 mb-6">
-                  {patients.map((p) => (
+                  {patients.map((p) => {
+                  return(
                     <label
                       key={p.patientId}
                       className="flex items-center gap-3 border border-gray-300 rounded-lg p-4 hover:bg-blue-50 cursor-pointer transition-all"
@@ -113,7 +123,7 @@ export default function ProfilePage() {
                         </div>
                       </div>
                     </label>
-                  ))}
+                  )})}
                 </div>
               ) : (
                 <div className="text-center py-8 mb-6">
@@ -135,7 +145,7 @@ export default function ProfilePage() {
                 label="修改資料"
                 icon={BiEdit}
                 className="w-full"
-                onClick={() => router.push("/patient/modify")}
+                onClick={handleModify}
               />
             )}
             
@@ -148,6 +158,7 @@ export default function ProfilePage() {
             {patients.length > 0 && (
               <Button
                 label="確認切換"
+                icon={FaExchangeAlt}
                 className="w-full"
                 onClick={handleSubmit}
               />

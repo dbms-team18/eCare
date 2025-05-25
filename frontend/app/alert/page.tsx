@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import { idToCategory } from '@/constants/vitalSignMap';
 
+
 // 要抓取的資料（與前端回傳資料包名稱一樣）
 type allAlertData = {
     alertId:number;
@@ -31,10 +32,7 @@ const AlertPage: React.FC = () => {
 
     // 定義會更改的變數
   const [alerts, setAlerts] = useState<allAlertData[]>([]);
-  const [confirmed, setConfirmed] = useState<{ [id: string]: boolean }>({});
   
-
-
 
   // 用取到的 patientid 抓 alert 資料
   useEffect(() => {
@@ -73,6 +71,8 @@ const AlertPage: React.FC = () => {
 
     fetchAlerts();
   }, [patientId]);
+
+  const [confirmed, setConfirmed] = useState<Set<number>>(new Set());
 
   const handleConfirm = async (usr: number, id: number) => {
   try {
@@ -120,7 +120,7 @@ const AlertPage: React.FC = () => {
               >
                 <div>
                   <p className="text-lg font-medium text-red-600">
-                    {idToCategory[String(record.signId)]}：{record.alertMessage}
+                    {idToCategory[String(record.alertType)]}：{record.alertMessage}
                   </p>
                   <p className="text-sm text-gray-500">
                     {record.alertTime ? formatTimestamp(record.alertTime) : '未知時間'}
