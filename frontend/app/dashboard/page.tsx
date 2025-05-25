@@ -24,7 +24,7 @@ export default function Dashboard() {
  interface VitalSignRow extends RowDataPacket {
   signId: number;
   vitalTypeId: number;
-  value: number;
+  value: string;
   recordDateTime: Date;
   comment: string;
   status:number;
@@ -71,7 +71,7 @@ const {patientId, patientName}  = usePatient();
     vitalSigns: topVitalSign.map((row) => ({
     signID: row.signId.toString(),
     vitalTypeId: row.vitalTypeId,
-    value: row.value,
+    value: parseInt(row.value),
     status: row.status === 1 ? '異常' : '正常',
   })),
 };

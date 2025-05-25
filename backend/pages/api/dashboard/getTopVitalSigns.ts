@@ -19,7 +19,7 @@ const getAllVitalSigns = async (req: NextApiRequest, res: NextApiResponse) => {
   interface VitalSignRow extends RowDataPacket {
   signId: number;
   vitalTypeId: number;
-  value: number;
+  value: string;
   recordDateTime: Date;
   comment: string;
   status:number;
