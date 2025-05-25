@@ -47,10 +47,20 @@ export default function ProfilePage() {
       });
   }, []);
 
+const handleModify = () =>{
+  const selected = patients.find((p) => String(p.patientId) === selectedId);
+  if (!selected) {
+    alert("請先選擇一位個案");
+    return;
+  }
+  router.push(`/patient/modify?patientId=${selectedId}`);
+}
+
+
   const handleSubmit = () => {
     const selected = patients.find((p) => String(p.patientId) === selectedId);
     if (selected) {
-      setPatient({ id: Number(selected.id), name: selected.name });
+      setPatient({ patientId: Number(selected.patientId), name: selected.name });
       localStorage.setItem("currentPatient", JSON.stringify(selected));
       router.push("/dashboard");
       alert(`已切換至個案：${selected.name}`);
@@ -132,7 +142,7 @@ export default function ProfilePage() {
                 label="修改資料"
                 icon={BiEdit}
                 className="w-full"
-                onClick={() => router.push("/patient/modify")}
+                onClick={handleModify}
               />
             )}
             
