@@ -58,10 +58,13 @@ const getAllVitalSigns = async (req: NextApiRequest, res: NextApiResponse) => {
     );
 
     if (topVitalSigns.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, err: "未找到任何生理資料" });
-    }
+      return res.status(200).json({
+        success: true,
+        message: "尚未有生理資料紀錄",
+        data: [],
+  });
+}
+
 
     return res.status(200).json({
     success: true,

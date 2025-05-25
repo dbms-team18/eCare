@@ -65,15 +65,39 @@ export default function Dashboard() {
       .finally(() => {});
   }, []);
 
+
+// 創建預設的生理資料卡片（當沒有資料時顯示）
+  const createDefaultVitalSigns = () => {
+    const defaultVitalTypes = [1, 2, 3, 4, 5, 6]; // 假設這些是你的生理資料類型 ID
+
+    return defaultVitalTypes.map((vitalTypeId) => ({
+      signID: -1,
+      vitalTypeId,
+      value: null, // 設定為 null 表示沒有資料
+      status: 2,
+    }));
+  };
+
+
+
+  const vitalSignsToShow = topVitalSign.length > 0 ? topVitalSign : createDefaultVitalSigns();
+
   const patientData = {
   name: patientName,
-  vitalSigns: topVitalSign.map((row) => ({
-    signID: row.signId.toString(),
+  message: topVitalSign.length > 0 ? "繼續保持！" : "開始記錄您的健康數據！",
+  vitalSigns: vitalSignsToShow.map((row) => ({
+    // row.signId 沒錯
+    signID: row.signId?.toString?.() ?? `default-${row.vitalTypeId}`,
     vitalTypeId: row.vitalTypeId,
-    value: parseFloat(row.value),
-    status: row.status === 1 ? '異常' : '正常',
+    value: row.value !== null ? parseFloat(row.value) : null,
+    status: 
+    row.status === 1 ? "異常" : 
+    row.status === 0 ? "正常" : 
+    "無資料",
   })),
 };
+
+
 
 const alertTriggered = patientData.vitalSigns.some(
   (vitalSign) => {
@@ -84,31 +108,9 @@ const alertTriggered = patientData.vitalSigns.some(
 );
 
 
-  // 創建預設的生理資料卡片（當沒有資料時顯示）
-  const createDefaultVitalSigns = () => {
-    const defaultVitalTypes = [1, 2, 3, 4, 5]; // 假設這些是你的生理資料類型 ID
-
-    return defaultVitalTypes.map((vitalTypeId) => ({
-      signID: `default-${vitalTypeId}`,
-      vitalTypeId: vitalTypeId,
-      value: null, // 設定為 null 表示沒有資料
-      status: "無資料",
-    }));
-  };
-  const vitalSignsToShow =
-    topVitalSign.length > 0 ? topVitalSign : createDefaultVitalSigns();
-
-  // 主畫面顯示
-  const patientData = {
-    name: patientName,
-    message: topVitalSign.length > 0 ? "繼續保持！" : "開始記錄您的健康數據！",
-    vitalSigns: vitalSignsToShow.map((row) => ({
-      signID: row.signId?.toString(),
-      vitalTypeId: row.vitalTypeId,
-      value: row.value,
-      status: row.status === 1 ? "異常" : row.status === 0 ? "正常" : "無資料",
-    })),
-  };
+  
+  
+  
 
   const handleAddRecord = (id: string) => {
     const vitalTypeId = Number(id);

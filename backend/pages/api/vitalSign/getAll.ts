@@ -48,10 +48,13 @@ const getPatientVitalSigns = async (
 
     // 如果沒有找到任何資料，返回 404 錯誤
     if (Array.isArray(vitalSigns) && vitalSigns.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, err: "未找到該病患的生理資料" });
-    }
+      return res.status(200).json({
+        success: true,
+        message: "該病患尚未建立任何生理資料",
+        data: [],
+      });
+}
+
 
     return res.status(200).json({ success: true, vitalSigns });
   } catch (err: unknown) {

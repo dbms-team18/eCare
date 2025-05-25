@@ -38,6 +38,8 @@ export default function UserInfoHeader() {
 
   const handleLogout = async () => {
     try {
+      localStorage.removeItem("uid");
+      localStorage.removeItem("currentRole");
       const res = await fetch("http://localhost:3001/api/User/logout", {
         method: "POST",
         credentials: "include",
@@ -45,8 +47,6 @@ export default function UserInfoHeader() {
 
       const data = await res.json();
       if (res.ok) {
-        localStorage.removeItem("userId");
-        localStorage.removeItem("currentPatient");
         alert("登出成功");
         router.push("/");
       } else {
