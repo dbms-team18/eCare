@@ -9,9 +9,9 @@ import mysqlConnectionPool from "../../../src/lib/mysql"
 
 
 interface VitalRow extends RowDataPacket{
-    signId:number;
-    userId: number;
     patientId: string;
+    userId: number;
+    signId:number;
     vitalTypeId: string;
     typeName:string;
     value: number;
@@ -22,10 +22,10 @@ interface VitalRow extends RowDataPacket{
   export const createAlert = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method !== 'POST') return res.status(405).end();
   
-    const { userID, patientID, vitalTypeID } = req.body;
+    const { userId, patientId, vitalTypeId } = req.body;
   
-    if (!userID || !patientID || !vitalTypeID) {
-      return res.status(400).json({ message: '缺少必要欄位 userID、patientID 或 vitalTypeID' });
+    if (!userId || !patientId || !vitalTypeId) {
+      return res.status(400).json({ message: '缺少必要欄位 userId、patientId 或 vitalTypeId' });
     }
   
     try {
@@ -36,7 +36,7 @@ interface VitalRow extends RowDataPacket{
            FROM vitalsigns 
            LEFT JOIN vitaltype ON vitalsigns.vitalTypeId = vitaltype.vitalTypeId 
            WHERE alertTrigger = 1 AND userId = ? AND patientId = ? AND vitalsigns.vitalTypeId = ?`,
-          [userID, patientID, vitalTypeID]
+          [userId, patientId, vitalTypeId]
         );
   
         if (vitalRows.length === 0) {
@@ -51,7 +51,8 @@ interface VitalRow extends RowDataPacket{
              VALUES (?, ?, ?, ?, ?, NOW(), 1)`,
             [
               vital.patientId,
-              userID,
+              userId,
+              // signId 是指對應的 sign row 不要再改了！！！
               vital.signId,
               vital.typeName,
               `${vital.typeName} need to be noticed`

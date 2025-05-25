@@ -4,8 +4,8 @@
 import Button from "../../../components/Button";
 import UserInfoHeader from "../../../components/UserInfoHeader";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { BiUser, BiPlus, BiEdit } from "react-icons/bi";
+import { FaExchangeAlt } from "react-icons/fa";
 import { usePatient } from "@/contexts/DashboardPatientContext";
 import { useEffect, useState } from "react";
 
@@ -145,6 +145,7 @@ export default function ProfilePage() {
             {patients.length > 0 && (
               <Button
                 label="確認切換"
+                icon={FaExchangeAlt}
                 className="w-full"
                 onClick={handleSubmit}
               />

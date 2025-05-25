@@ -10,6 +10,8 @@ import { useSearchParams } from "next/navigation";
 import axios from "axios";
 
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
+import { useUser } from '@/contexts/DashboardUserContext';
+import { usePatient } from '@/contexts/DashboardPatientContext';
 import { idToCategory, vitalTypeOptions } from "@/constants/vitalSignMap";
 import { formatCreateDate } from "@/lib/format";
 
@@ -30,6 +32,7 @@ interface VitalSignRecord {
   value?: number | string; // For UI purposes
 }
 
+// 要送出 create 請求的封包格式
 interface NewRecordForm {
   value: string;
   comment: string;
@@ -66,10 +69,11 @@ const VitalSignsPage: React.FC = () => {
   const searchParams = useSearchParams();
   const vitalTypeIdFromQuery = searchParams.get("category") || "";
 
-  const isCaregiver = 1;
-  const patientName = "王小明";
-  const userId = "1";
-  const patientId = "1";
+  // 從 context 抓 userId, patientId
+  const {isCaregiver, userId} = useUser();
+  const {patientName, patientId} = usePatient();
+ const roleNumber = isCaregiver ? 1 : 0;
+
 
   // State hooks
   const [records, setRecords] = useState<VitalSignRecord[]>([]);
@@ -98,8 +102,10 @@ const VitalSignsPage: React.FC = () => {
 
   // Fetch data on mount
   useEffect(() => {
+  if (userId != null && patientId != null) {
     fetchVitalSigns();
-  }, []);
+  }
+}, [userId, patientId]);
 
   // Update form when query param changes
   useEffect(() => {
@@ -116,38 +122,47 @@ const VitalSignsPage: React.FC = () => {
   // const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
   const fetchVitalSigns = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      setLoading(true);         // 開始載入
+      setError(null);           // 清除前一次錯誤訊息
 
-      const params = new URLSearchParams({
-        userId: userId.toString(),
-        patientId: patientId.toString(),
-      });
+  // 設定查詢參數
+  const params = new URLSearchParams({
+    userId: userId.toString(),
+    patientId: patientId.toString(),
+  });
 
-      const response = await fetch(
-        `http://localhost:3001/api/vitalSign/getAll?${params.toString()}`
-      );
+  // 發送 API 請求
+  const response = await fetch(`http://localhost:3001/api/vitalSign/getAll?${params.toString()}`);
 
-      if (!response.ok) {
-        // 處理錯誤狀態
-        const errorData = await response.json();
-        throw new Error(errorData.err || "獲取生理指標失敗");
-      }
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.err || "獲取生理指標失敗");
+  }
 
-      const data = await response.json();
-      if (data.success && data.vitalSigns) {
-        const transformedData = transformApiDataToFrontend(data.vitalSigns);
-        setRecords(transformedData);
-      } else {
-        setRecords([]);
-      }
-    } catch (error) {
-      console.error("獲取生理指標出錯:", error);
-      setError(error instanceof Error ? error.message : "獲取資料失敗");
-      setRecords([]); // 發生錯誤時設為空陣列
-    } finally {
-      setLoading(false); // 無論成功或失敗都要停止 loading
+  const data = await response.json();
+
+  // 判斷是否成功並有資料
+  if (data.success) {
+    const vitalSigns = data.vitalSigns || [];
+
+    if (vitalSigns.length === 0) {
+      setError("目前尚無任何生理資料");
+      setRecords([]);
+    } else {
+      const transformedData = transformApiDataToFrontend(vitalSigns);
+      setRecords(transformedData);
     }
+  } else {
+    throw new Error(data.err || "資料取得失敗");
+  }
+} catch (error) {
+  console.error("獲取生理指標出錯:", error);
+  setError(error instanceof Error ? error.message : "獲取資料失敗");
+  setRecords([]);
+} finally {
+  setLoading(false);
+}
+
   };
   // 資料轉換函數
   const transformApiDataToFrontend = (apiData: any[]): VitalSignRecord[] => {
@@ -553,7 +568,7 @@ const VitalSignsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-green-50 to-yellow-50 p-4">
       <div className="max-w-6xl mx-auto bg-white rounded-3xl p-8 shadow-md">
-        <DashboardHeader isCaregiver={isCaregiver} patientName={patientName} />
+        <DashboardHeader isCaregiver={roleNumber} patientName={patientName} />
         <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
           健康紀錄
         </h1>

@@ -123,17 +123,16 @@ const createVitalSign = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const signId = result.insertId;
 
-    // 如果需要觸發警報，呼叫 alert/create API
+    // 如果需要觸發警報，呼叫 alert/createAlert API
     if (alertTrigger) {
       try {
         // 呼叫 alert/create API
         await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/alert/create`,
+          `http://localhost:3001/api/alert/createAlert`,
           {
-            userId,
-            patientId,
-            vitalSignId: signId,
-            vitalTypeId,
+            userId:userId,
+            patientId:patientId,
+            vitalTypeId:vitalTypeId            
           }
         );
       } catch {
