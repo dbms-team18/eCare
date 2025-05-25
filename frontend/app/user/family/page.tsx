@@ -4,25 +4,55 @@
 import Button from '../../../components/Button'
 import UserInfoHeader from '../../../components/UserInfoHeader'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BiUser, BiPlus, BiArrowBack } from 'react-icons/bi'
 import { usePatient } from '@/contexts/DashboardPatientContext';
 
+interface Patient {
+  patientId: number;
+  name: string;
+  idNum: string;
+  age: number;
+}
 
 export default function ProfilePage() {
     const { setPatient } = usePatient();
     const router = useRouter()
-    const patients = [
-        { id: '1', name: '王小明', idNumber: 'F229123456', age: 70 },
-        { id: '2', name: '李阿姨', idNumber: 'F229654321', age: 83 },
-      ]
+    const [patients, setPatients] = useState<Patient[]>([]);
     const [selectedId, setSelectedId] = useState('')
+    const [isLoading, setIsLoading] = useState(true);
+
+useEffect(() => {
+    fetch("http://localhost:3001/api/patient/getAll", {
+      credentials: "include", // 加這行才能送出 cookie
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setPatients(data.data);
+          if (data.message) {
+            console.log(data.message);
+          }
+        } else {
+          alert(data.message || "病患資料載入失敗");
+        }
+      })
+      .catch((err) => {
+        console.error("錯誤:", err);
+        alert("連線失敗");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
+
 
     const handleSubmit = () => {
-        const selected = patients.find((p) => p.id === selectedId)
+        const selected = patients.find((p) => p.patientId === selectedId)
         if (selected) {
-            setPatient({ id: Number(selected.id), name: selected.name });
+            setPatient({ patientId: Number(selected.patientId), name: selected.name });
             localStorage.setItem('currentPatient', JSON.stringify(selected)) // 先暫存
             router.push('/dashboard')
             alert(`已切換至個案：${selected.name}`)
@@ -53,7 +83,7 @@ export default function ProfilePage() {
             <div className="space-y-4 mb-6">
               {patients.map((p) => (
                 <label
-                  key={p.id}
+                  key={p.patientId}
                   className="flex items-center gap-3 border border-gray-300 rounded-lg p-4 hover:bg-blue-50 cursor-pointer transition-all"
                 >
                   <input
