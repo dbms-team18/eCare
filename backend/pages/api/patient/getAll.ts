@@ -61,7 +61,6 @@ const uid = cookies.uid;
 if (!uid) {
   return res.status(401).json({ success: false, message: '未登入或缺少 uid cookie' });
 }
-
   const { userId } = req.query;
   
   // Use userId from query or uid from cookie

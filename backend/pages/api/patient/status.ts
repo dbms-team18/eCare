@@ -82,7 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ success: false, message: 'Method Not Allowed' });
   }
 
-  // 從 cookie 取得 uid
+// 從 cookie 取得 uid
 const cookieHeader = req.headers.cookie;
 const cookies = cookieHeader ? parse(cookieHeader) : {};
 const uid = cookies.uid;
@@ -90,7 +90,6 @@ const uid = cookies.uid;
 if (!uid) {
   return res.status(401).json({ success: false, message: '未登入或缺少 uid cookie' });
 }
-
 
   try {
     // Get request body
