@@ -34,13 +34,10 @@ export default function BindPatientPage() {
 
     if (!response.ok || !result.success) {
       setBindResult('fail');
-      alert(result.message || '綁定失敗');
       return;
     }
 
     setBindResult('success')
-    alert('綁定成功！');
-
   } catch (err) {
     console.error('綁定請求失敗:', err);
     setBindResult('fail')

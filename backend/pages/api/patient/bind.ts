@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { RowDataPacket, ResultSetHeader } from 'mysql2';
+import { ResultSetHeader } from 'mysql2';
 import mysqlConnectionPool from '../../../src/lib/mysql';
 
 export const bindPatient = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -29,7 +29,9 @@ export const bindPatient = async (req: NextApiRequest, res: NextApiResponse) => 
       
       // Check if update was successful
       if (result.affectedRows === 0) {
-        return res.status(500).json({ success: false, message: '更新失敗' });
+        return res.status(500).json({ 
+          success: false, 
+          message: '更新失敗' });
       }
       
           
