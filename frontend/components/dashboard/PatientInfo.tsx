@@ -1,11 +1,11 @@
 import React from 'react';
 
 type PatientInfoProps = {
-  message: string;
-  alertTriggered: boolean; // 新增屬性
+  alertTriggered: boolean;
 };
 
-const PatientInfo: React.FC<PatientInfoProps> = ({ message, alertTriggered }) => {
+const PatientInfo: React.FC<PatientInfoProps> = ({ alertTriggered }) => {
+  const message = alertTriggered ? "請查看健康警示" : "繼續保持！";
   return (
     <div className="col-span-3">
       <div className="bg-white p-4 rounded-xl shadow-sm border mb-6">
@@ -13,7 +13,7 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ message, alertTriggered }) =>
       </div>
       <div className="flex justify-center">
         <img
-          src={alertTriggered ? "/alert-image.svg" : "/patient-cartoon.svg"} // 根據 alertTriggered 切換圖片
+          src={alertTriggered ? "/alert-image.svg" : "/patient-cartoon.svg"}
           alt="Patient illustration"
           className="w-full max-w-[250px]"
           onError={(e) => {
@@ -28,8 +28,3 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ message, alertTriggered }) =>
 };
 
 export default PatientInfo;
-
-<PatientInfo
-  message="繼續保持！"
-  alertTriggered={true} // 傳入是否觸發警報
-/>
