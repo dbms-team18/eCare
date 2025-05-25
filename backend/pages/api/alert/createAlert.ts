@@ -60,7 +60,7 @@ interface VitalRow extends RowDataPacket{
           );
   
           await connection.execute(
-            `UPDATE vitalsigns SET alertTrigger = 0 WHERE signId = ?`,
+            `UPDATE vitalsigns SET status = 1, alertTrigger = 0 WHERE signId = ?`,
             [vital.signId]
           );
   
