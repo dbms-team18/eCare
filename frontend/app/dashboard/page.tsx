@@ -14,9 +14,12 @@ import PatientInfo from "../../components/dashboard/PatientInfo";
 import { idToCategory, unitMap, iconMap } from "@/constants/vitalSignMap";
 import { useUser } from "@/contexts/DashboardUserContext";
 import { usePatient } from "@/contexts/DashboardPatientContext";
+import { getAlertMessage } from '@/lib/getAlertMessage';
+
 
 export default function Dashboard() {
   const router = useRouter();
+
 
   //  準備要用來接收的 rowData
   interface VitalSignRow extends RowDataPacket {
@@ -62,6 +65,25 @@ export default function Dashboard() {
       .finally(() => {});
   }, []);
 
+  const patientData = {
+  name: patientName,
+  vitalSigns: topVitalSign.map((row) => ({
+    signID: row.signId.toString(),
+    vitalTypeId: row.vitalTypeId,
+    value: parseFloat(row.value),
+    status: row.status === 1 ? '異常' : '正常',
+  })),
+};
+
+const alertTriggered = patientData.vitalSigns.some(
+  (vitalSign) => {
+    // 只要 getAlertMessage 回傳不是「正常」就算觸發
+    const msg = getAlertMessage(vitalSign.vitalTypeId, vitalSign.value);
+    return msg.includes('過高') || msg.includes('過低') || msg.includes('異常');
+  }
+);
+
+
   // 創建預設的生理資料卡片（當沒有資料時顯示）
   const createDefaultVitalSigns = () => {
     const defaultVitalTypes = [1, 2, 3, 4, 5]; // 假設這些是你的生理資料類型 ID
@@ -96,16 +118,11 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-r from-green-100 to-yellow-100 p-4">
       <div className="max-w-6xl mx-auto bg-white rounded-3xl p-8 shadow-md">
-        <DashboardHeader />
+        <DashboardHeader patientName={patientData.name} isCaregiver={0} alertTriggered={alertTriggered} />
         <div className="grid grid-cols-12 gap-6">
           <PatientInfo
             message={patientData.message}
-            alertTriggered={patientData.vitalSigns.some(
-              (vitalSign) =>
-                (vitalSign.vitalTypeId === 2 && vitalSign.value > 120) || // 收縮壓
-                (vitalSign.vitalTypeId === 5 && vitalSign.value < 92) // 血氧
-            )}
-          />
+            alertTriggered={alertTriggered} />
           <VitalSignsGrid
             vitalSigns={patientData.vitalSigns.map((vitalSign) => ({
               id: vitalSign.signID,
