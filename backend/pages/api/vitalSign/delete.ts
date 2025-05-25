@@ -27,32 +27,36 @@ export const deleteVitalSign = async (
 
   const connection = await mysqlConnectionPool.getConnection();
   try {
-    // 執行刪除操作
-    const [result] = await connection.execute<ResultSetHeader>(
-      `DELETE FROM vitalsigns WHERE signId = ?`,
-      [signId]
-    );
+  // 開始交易
+  await connection.beginTransaction();
 
-    // 如果沒有刪除的行，返回 404 錯誤
-    if (result.affectedRows === 0) {
-      return res
-        .status(404)
-        .json({ success: false, err: "未找到對應的生理資料" });
-    }
+  // 先刪除 alert 中與該 signId 相關的紀錄
+  const [alertResult] = await connection.execute<ResultSetHeader>(
+    'DELETE FROM alert WHERE signId = ?',
+    [signId]
+  );
 
-    // 刪除成功後返回訊息
-    return res.status(200).json({
-      success: true,
-      message: "生理資料刪除成功",
-    });
-  } catch (err: any) {
-    // 捕獲異常，並返回錯誤訊息
-    const errorMessage = err instanceof Error ? err.message : "未知錯誤";
-    return res.status(500).json({
-      success: false,
-      err: `內部錯誤: ${errorMessage}`,
-    });
-  } finally {
+  // 再刪除 vitalsigns 中的紀錄
+  const [vitalResult] = await connection.execute<ResultSetHeader>(
+    'DELETE FROM vitalsigns WHERE signId = ?',
+    [signId]
+  );
+
+  // 如果都成功，提交交易
+  await connection.commit();
+
+  // 判斷是否真的有刪除紀錄
+  if (vitalResult.affectedRows === 0) {
+    return res.status(404).json({ success: false, message: '找不到對應的紀錄' });
+  }
+  return res.status(200).json({ success: true, message: '刪除成功' });
+
+} catch (error) {
+  // 若中途出錯則回滾交易
+  await connection.rollback();
+  return res.status(500).json({ success: false, message: '刪除失敗', error });
+
+} finally {
     // 釋放連接回連接池
     connection.release();
   }
