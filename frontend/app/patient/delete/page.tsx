@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 
-// TypeScript interface for patient data
+//interface for patient data
 interface Patient {
   id: number;
   name: string;
@@ -25,9 +25,11 @@ export default function PatientDeletePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Modal/popup states (following VitalSign pattern)
+  // Modal/popup states
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [showArchivePopup, setShowArchivePopup] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [patientToDelete, setPatientToDelete] = useState<number | null>(null);
   const [patientToArchive, setPatientToArchive] = useState<number | null>(null);
 
@@ -37,7 +39,7 @@ export default function PatientDeletePage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/patient/getAll');
+      const response = await fetch('http://localhost:3001/api/patient/getAll');
       const result = await response.json();
       
       if (result.success) {
@@ -53,10 +55,13 @@ export default function PatientDeletePage() {
     }
   };
 
-  // Archive patient function 
+  // Archive patient function with loading status
   const archivePatient = async (patientId: number) => {
     try {
-      const response = await fetch('/api/patient/status', { //連到負責刪除的後端status.ts
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('http://localhost:3001/api/patient/status', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,10 +75,12 @@ export default function PatientDeletePage() {
       const result = await response.json();
       
       if (result.success) {
-        // Update the patient in the list
+        // Update the patient in the list instead of removing
         setPatients(patients.map(p => 
           p.id === patientId ? { ...p, isArchived: true } : p
         ));
+        setSuccessMessage('病患已成功封存！');
+        setShowSuccessPopup(true);
         return true;
       } else {
         setError(result.message || '封存失敗');
@@ -83,13 +90,18 @@ export default function PatientDeletePage() {
       console.error('Error:', error);
       setError('網路錯誤，請稍後再試');
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Delete patient 
+  // Delete patient function w/ loading status
   const deletePatient = async (patientId: number) => {
     try {
-      const response = await fetch('/api/patient/status', {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('http://localhost:3001/api/patient/status', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,6 +117,8 @@ export default function PatientDeletePage() {
       if (result.success) {
         // Remove patient from the list
         setPatients(patients.filter(p => p.id !== patientId));
+        setSuccessMessage('病患資料已永久刪除！');
+        setShowSuccessPopup(true);
         return true;
       } else {
         setError(result.message || '刪除失敗');
@@ -114,6 +128,8 @@ export default function PatientDeletePage() {
       console.error('Error:', error);
       setError('網路錯誤，請稍後再試');
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -148,7 +164,7 @@ export default function PatientDeletePage() {
     }
   };
 
-  // Load patients when component mounts...
+  // Load patients 
   useEffect(() => {
     fetchPatients();
   }, []);
@@ -228,7 +244,7 @@ export default function PatientDeletePage() {
           </ul>
         )}
 
-        {/* Archive Confirmation */}
+        {/* Archive Confirmation Modal */}
         {showArchivePopup && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded shadow-lg max-w-md w-full mx-4">
@@ -252,6 +268,41 @@ export default function PatientDeletePage() {
           </div>
         )}
 
+        {/* Popup when success */}
+        {showSuccessPopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-8 h-8 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  操作成功！
+                </h3>
+                <p className="text-gray-600 mb-4">{successMessage}</p>
+                <button
+                  className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                  onClick={() => setShowSuccessPopup(false)}
+                >
+                  確認
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Delete Confirmation Modal */}
         {showDeletePopup && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -268,8 +319,9 @@ export default function PatientDeletePage() {
                 <button
                   className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
                   onClick={handleDelete}
+                  disabled={loading}
                 >
-                  確定刪除
+                  {loading ? "刪除中..." : "確定刪除"}
                 </button>
               </div>
             </div>
