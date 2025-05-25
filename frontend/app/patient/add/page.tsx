@@ -17,7 +17,6 @@ export default function AddPatientPage() {
   const [emerPhone, setEmergencyPhone] = useState("");
   const [info, setNotes] = useState("");
   const router = useRouter();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log({
@@ -68,6 +67,7 @@ export default function AddPatientPage() {
       alert("資料送出失敗");
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#d6f5f0] px-4">
