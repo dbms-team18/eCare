@@ -34,85 +34,52 @@ const VitalSignCard: React.FC<VitalSignCardProps> = ({
   };
 
   // 為血壓值特別處理
-  const renderValue = () => {
-    if (showNoData || vitalSign.value === null) {
-      return (
-        <div className="flex flex-col items-center justify-center h-20">
-          <div className="text-gray-400 text-sm">No Data</div>
-          <div className="text-gray-300 text-xs mt-1">點擊新增記錄</div>
-        </div>
-      );
-    }
+   const renderValue = () => {
+  if (showNoData || vitalSign.value === null) {
+    return (
+      <div className="flex flex-col items-center justify-center h-20">
+        <div className="text-gray-400 text-sm">No Data</div>
+        <div className="text-gray-300 text-xs mt-1">點擊新增記錄</div>
+      </div>
+    );
+  }
 
-    if (
-      vitalSign.id === "blood-pressure" &&
-      typeof vitalSign.value === "object"
-    ) {
-      const { systolic, diastolic } = vitalSign.value as {
-        systolic: number;
-        diastolic: number;
-      };
+  const statusColor = vitalSign.status === '異常' ? 'text-red-500' : 'text-green-500';
 
-      // 定義血壓標準值
-      const standardSystolic = 120;
-      const standardDiastolic = 80;
+  if (vitalSign.id === 'blood-pressure' && typeof vitalSign.value === 'object') {
+    const { systolic, diastolic } = vitalSign.value as {
+      systolic: number;
+      diastolic: number;
+    };
 
-      // 動態設定樣式
-      const systolicColor =
-        systolic > standardSystolic ? "text-red-500" : "text-green-500";
-      const diastolicColor =
-        diastolic > standardDiastolic ? "text-red-500" : "text-green-500";
+    return (
+      <div className="flex items-end mt-3">
+        <span className={`text-4xl font-bold ${statusColor}`}>{systolic}</span>
+        <span className="text-gray-500 mx-2 mb-1">/</span>
+        <span className={`text-4xl font-bold ${statusColor}`}>{diastolic}</span>
+        <span className="text-gray-500 mb-1 ml-2">{vitalSign.unit}</span>
+      </div>
+    );
+  }
 
-      return (
-        <div className="flex items-end mt-3">
-          <span className={`text-4xl font-bold ${systolicColor}`}>
-            {systolic}
-          </span>
-          <span className="text-gray-500 mx-2 mb-1">/</span>
-          <span className={`text-4xl font-bold ${diastolicColor}`}>
-            {diastolic}
-          </span>
-          <span className="text-gray-500 mb-1 ml-2">{vitalSign.unit}</span>
-        </div>
-      );
-    }
+  if (typeof vitalSign.value === 'number') {
+    const value = vitalSign.value;
+    const formattedValue =
+      vitalSign.id === 'blood-sugar' ? value.toFixed(1) : value;
 
-    if (typeof vitalSign.value === "number") {
-      let colorClass = "text-green-500"; // 預設為綠色
-      const value = vitalSign.value;
+    return (
+      <div className="flex items-end mt-3">
+        <span className={`text-4xl font-bold ${statusColor}`}>{formattedValue}</span>
+        <span className="text-gray-500 ml-2 mb-1">{vitalSign.unit}</span>
+      </div>
+    );
+  }
 
-      // 根據生命特徵設定顏色
-      if (vitalSign.id === "heart-rate") {
-        colorClass =
-          value < 60 || value > 100 ? "text-red-500" : "text-green-400";
-      } else if (vitalSign.id === "blood-oxygen") {
-        colorClass = value < 92 ? "text-red-500" : "text-green-400";
-      } else if (vitalSign.id === "weight") {
-        colorClass =
-          value < 50 || value > 85 ? "text-red-500" : "text-green-400";
-      } else if (vitalSign.id === "blood-sugar") {
-        // 假設飯前血糖
-        colorClass =
-          value < 70 || value > 99 ? "text-red-500" : "text-green-400";
-      }
+  return null;
+};
 
-      const formattedValue =
-        vitalSign.id === "blood-sugar" ? value.toFixed(1) : value;
-
-      return (
-        <div className="flex items-end mt-3">
-          <span className={`text-4xl font-bold ${colorClass}`}>
-            {formattedValue}
-          </span>
-          <span className="text-gray-500 ml-2 mb-1">{vitalSign.unit}</span>
-        </div>
-      );
-    }
-
-    // 如果 value 不是數字或物件，返回空
-    return null;
-  };
-
+  
+  
   return (
     <div
       className={`bg-white p-4 rounded-xl shadow-sm border ${isWide ? "col-span-2" : ""}`}
@@ -122,7 +89,8 @@ const VitalSignCard: React.FC<VitalSignCardProps> = ({
           <span className="text-2xl mr-3">{vitalSign.icon}</span>
           <span className="text-xl text-gray-500">{vitalSign.name}</span>
         </div>
-        <span className="text-green-500 font-semibold text-lg">
+        <span className={`font-semibold text-lg ${vitalSign.status === '異常' ? 'text-red-500' : 'text-green-500'}`}>
+
           {vitalSign.status}
         </span>
       </div>
