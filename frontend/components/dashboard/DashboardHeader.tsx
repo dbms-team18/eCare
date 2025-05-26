@@ -79,19 +79,19 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </button>
           </li> */}
           <li>
-            <button className="group" onClick={handlePersonaClick}>
+            <button className="group" onClick={handleHomeClick}>
               <img
-                src="/profile.svg"
-                alt="Profile Icon"
+                src="/home.svg"
+                alt="Home Icon"
                 className="w-10 h-10 group-hover:scale-110 transition-transform duration-200"
               />
             </button>
           </li>
           <li>
-            <button className="group" onClick={handleHomeClick}>
+            <button className="group" onClick={handlePersonaClick}>
               <img
-                src="/home.svg"
-                alt="Home Icon"
+                src="/profile.svg"
+                alt="Profile Icon"
                 className="w-10 h-10 group-hover:scale-110 transition-transform duration-200"
               />
             </button>

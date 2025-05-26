@@ -12,7 +12,7 @@ import { useUser } from '@/contexts/DashboardUserContext';
 //import Button from 'app/components/Button'
 
 export default function LoginPage() {
-  const { setRole } = useUser();
+  const { setRole, setUser } = useUser();
   //const [email, setEmail] = useState('')
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('')
@@ -54,6 +54,8 @@ export default function LoginPage() {
     localStorage.setItem('uid', JSON.stringify(data.uid));
     localStorage.setItem('currentRole', JSON.stringify(data.role)) // 先暫存
     setRole(data.role); 
+    setUser(data.uid); 
+
 
 
   } catch (err) {
