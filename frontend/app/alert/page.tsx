@@ -127,14 +127,14 @@ const AlertPage: React.FC = () => {
                   </p>
                 </div>
                 <button
-                  className={`px-4 py-2 rounded font-bold ${
+                  className={`px-4 py-2 rounded font-bold cursor-pointer ${
                     confirmed.has(record.alertId)
                       ? 'bg-gray-600 text-white'
                       : 'bg-red-500 text-white'
                   }`}
                   onClick={() => handleConfirm(record.userId,record.alertId)}
                 >
-                  {confirmed.has(record.alertId) ? '已確認' : '待確認'}
+                  {'確認'}
                 </button>
               </li>
             ))}

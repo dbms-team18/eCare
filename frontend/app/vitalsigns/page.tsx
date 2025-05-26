@@ -631,7 +631,7 @@ const VitalSignsPage: React.FC = () => {
 
               {/* 送出按鈕 */}
               <button
-                className="p-2 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 transition"
+                className="p-2 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 transition cursor-pointer"
                 onClick={handleAddRecord}
                 disabled={loading}
               >
@@ -668,14 +668,14 @@ const VitalSignsPage: React.FC = () => {
                         <>
                           {/* 編輯icon */}
                           <button onClick={() => openEdit(record)} title="編輯">
-                            <Pencil className="w-8 h-8 text-blue-500 hover:text-blue-700" />
+                            <Pencil className="w-8 h-8 text-blue-500 hover:text-blue-700 cursor-pointer" />
                           </button>
                           {/* 刪除icon */}
                           <button
                             onClick={() => confirmDelete(record.signId!)}
                             title="刪除"
                           >
-                            <Trash2 className="w-8 h-8 text-red-500 hover:text-red-700" />
+                            <Trash2 className="w-8 h-8 text-red-500 hover:text-red-700 cursor-pointer" />
                           </button>
                         </>
                       )}

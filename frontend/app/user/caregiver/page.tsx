@@ -184,7 +184,7 @@ export default function ProfilePage() {
               <Button
                 label="修改資料"
                 icon={BiEdit}
-                className="w-full"
+                className="w-full cursor-pointer"
                 onClick={handleModify}
               />
             )}
@@ -192,14 +192,14 @@ export default function ProfilePage() {
             <Button
               label="新增病患"
               icon={BiPlus}
-              className="w-full"
+              className="w-full cursor-pointer"
               onClick={() => router.push("/patient/add")}
             />
             {patients.length > 0 && (
               <Button
                 label="確認切換"
                 icon={FaExchangeAlt}
-                className="w-full"
+                className="w-full cursor-pointer"
                 onClick={handleSubmit}
               />
             )}

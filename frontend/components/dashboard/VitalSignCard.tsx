@@ -1,5 +1,5 @@
 import React from "react";
-import { useAuth } from "../../contexts/AuthContext";
+import { useUser } from "../../contexts/DashboardUserContext";
 
 export type VitalSign = {
   id: string;
@@ -23,7 +23,7 @@ const VitalSignCard: React.FC<VitalSignCardProps> = ({
   showNoData = false,
   onAddRecord,
 }) => {
-  const { user } = useAuth(); // 取得 user
+  const { role } = useUser(); // 取得 user role
 
   // 處理加號按鈕點擊
   const handleAddClick = () => {
@@ -98,9 +98,9 @@ const VitalSignCard: React.FC<VitalSignCardProps> = ({
         <div className="flex items-end">{renderValue()}</div>
 
         {/* 新增紀錄按鈕 */}
-        {user && user.role === 0 && (
+        {role === 0 && (
           <button
-            className="text-blue-500 hover:text-blue-700 transition-colors text-sm"
+            className="text-blue-500 hover:text-blue-700 transition-colors text-sm cursor-pointer"
             onClick={handleAddClick}
           >
             + 新增紀錄

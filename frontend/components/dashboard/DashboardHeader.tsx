@@ -126,6 +126,7 @@ useEffect(() => {
               <img
                 src="/profile.svg"
                 alt="Profile Icon"
+                title="查看警示"
                 className="w-10 h-10 group-hover:scale-110 transition-transform duration-200 cursor-pointer"
               />
             </button>

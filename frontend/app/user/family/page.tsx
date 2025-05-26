@@ -67,7 +67,7 @@ useEffect(() => {
       // 有 alert 就設為觸發
       const isTriggered = result.allAlertData.length > 0;
       localStorage.setItem("alertTriggered",isTriggered? "1" : "0")
-      setalertTriggered(isTriggered > 0 ? 1 : 0)
+      setalertTriggered(isTriggered?  1 : 0)
       console.log("成功回傳:", result);
     } else {
       console.warn("警報資料格式錯誤:", result);
@@ -155,13 +155,13 @@ useEffect(() => {
             <Button
                 label="綁定病患"
                 icon={BiPlus}
-                className="w-full"
+                className="w-full cursor-pointer"
                 onClick={() => router.push('/patient/bind')}
               />
               <Button
                 label="確認切換"
                 icon={FaExchangeAlt}
-                className="w-full"
+                className="w-full cursor-pointer"
                 onClick={handleSubmit}
               />
               

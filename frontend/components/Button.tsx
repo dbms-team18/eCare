@@ -16,12 +16,12 @@ export default function Button({
   ...rest //
 }: ButtonProps) {
   const baseStyle =
-    'flex items-center justify-center gap-2 px-6 py-2 rounded font-bold transition-colors duration-200 outline-none'
+    'flex items-center justify-center gap-2 px-6 py-2 rounded font-bold transition-colors duration-200 outline-none cursor-pointer'
 
   const variantStyle =
     variant === 'solid'
-      ? 'bg-[#1E40AF] text-white border-2 border-transparent hover:bg-white hover:text-[#1E40AF] hover:border-[#1E40AF]'
-      : 'border-2 border-[#1E40AF] text-[#1E40AF] hover:bg-[#1E40AF] hover:text-white'
+      ? 'bg-[#1E40AF] text-white border-2 border-transparent hover:bg-white hover:text-[#1E40AF] hover:border-[#1E40AF] cursor-pointer'
+      : 'border-2 border-[#1E40AF] text-[#1E40AF] hover:bg-[#1E40AF] hover:text-white cursor-pointer'
 
   return (
     <button

@@ -89,9 +89,9 @@ export default function UserInfoHeader() {
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 bg-gray-100 text-gray-700 px-3 py-1 rounded-lg text-sm hover:bg-gray-200 transition w-full justify-center"
+                className="flex items-center gap-2 bg-gray-100 text-gray-700 px-3 py-1 rounded-lg text-sm hover:bg-gray-200 transition w-full justify-center cursor-pointer"
               >
-                <BiLogOut className="text-lg" />
+                <BiLogOut className="text-lg " />
                 登出
               </button>
             </div>
