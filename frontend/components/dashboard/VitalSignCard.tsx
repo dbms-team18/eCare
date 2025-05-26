@@ -23,8 +23,7 @@ const VitalSignCard: React.FC<VitalSignCardProps> = ({
   showNoData = false,
   onAddRecord,
 }) => {
-  // 模擬 isCaregiver 函數
-  const isCaregiver = () => 1; // 假設為照顧者
+  const { user } = useAuth(); // 取得 user
 
   // 處理加號按鈕點擊
   const handleAddClick = () => {
@@ -39,7 +38,6 @@ const VitalSignCard: React.FC<VitalSignCardProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-20">
         <div className="text-gray-400 text-sm">No Data</div>
-        <div className="text-gray-300 text-xs mt-1">點擊新增記錄</div>
       </div>
     );
   }
@@ -100,7 +98,7 @@ const VitalSignCard: React.FC<VitalSignCardProps> = ({
         <div className="flex items-end">{renderValue()}</div>
 
         {/* 新增紀錄按鈕 */}
-        {isCaregiver() && (
+        {user && user.role === 0 && (
           <button
             className="text-blue-500 hover:text-blue-700 transition-colors text-sm"
             onClick={handleAddClick}

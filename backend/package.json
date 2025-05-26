@@ -27,7 +27,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.1",
     "@types/mysql": "^2.15.27",
-    "@types/node": "^20.17.47",
+    "@types/node": "^20.17.50",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

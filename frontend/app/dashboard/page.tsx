@@ -107,11 +107,6 @@ const alertTriggered = patientData.vitalSigns.some(
   }
 );
 
-
-  
-  
-  
-
   const handleAddRecord = (id: string) => {
     const vitalTypeId = Number(id);
     router.push(`/vitalsigns?category=${vitalTypeId}`);

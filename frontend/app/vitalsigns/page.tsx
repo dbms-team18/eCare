@@ -14,6 +14,8 @@ import { useUser } from '@/contexts/DashboardUserContext';
 import { usePatient } from '@/contexts/DashboardPatientContext';
 import { idToCategory, vitalTypeOptions } from "@/constants/vitalSignMap";
 import { formatCreateDate } from "@/lib/format";
+import { useAuth } from "@/contexts/AuthContext";
+
 
 // Define interfaces
 interface VitalSignRecord {
@@ -72,7 +74,7 @@ const VitalSignsPage: React.FC = () => {
   // 從 context 抓 userId, patientId
   const {isCaregiver, userId} = useUser();
   const {patientName, patientId} = usePatient();
- const roleNumber = isCaregiver ? 1 : 0;
+  const { user, loading: authLoading } = useAuth();
 
 
   // State hooks
@@ -102,7 +104,7 @@ const VitalSignsPage: React.FC = () => {
 
   // Fetch data on mount
   useEffect(() => {
-  if (userId != null && patientId != null) {
+  if (userId && patientId) {
     fetchVitalSigns();
   }
 }, [userId, patientId]);
@@ -471,7 +473,7 @@ const VitalSignsPage: React.FC = () => {
 
     setEditRecord({
       ...record,
-      value, // Add temporary field for UI
+      value: value, // Add temporary field for UI
     });
     setShowEditPopup(true);
   };
@@ -568,7 +570,7 @@ const VitalSignsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-green-50 to-yellow-50 p-4">
       <div className="max-w-6xl mx-auto bg-white rounded-3xl p-8 shadow-md">
-        <DashboardHeader isCaregiver={roleNumber} patientName={patientName} />
+        <DashboardHeader isCaregiver={user && user.role === 0 ? 1 : 0} patientName={patientName} />
         <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
           健康紀錄
         </h1>
@@ -579,64 +581,65 @@ const VitalSignsPage: React.FC = () => {
             {error}
           </div>
         )}
+        {/* 只有 user.role === 0 時才顯示新增表單 */}
+        {user && user.role === 0 && (
+          <div className="mb-6 p-4 border border-blue-300 rounded-lg bg-blue-50">
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-5">
+              {/* 選擇類別 */}
+              <select
+                className="p-2 border rounded font-semibold text-green-600 dark:text-green-600"
+                value={newRecord.vitalTypeId}
+                onChange={(e) =>
+                  setNewRecord({
+                    ...newRecord,
+                    vitalTypeId: e.target.value,
+                    value: "",
+                  })
+                }
+              >
+                <option value="">選擇類別</option>
+                {vitalTypeOptions.map((opt) => (
+                  <option key={opt.id} value={String(opt.id)}>
+                    {opt.name}
+                  </option>
+                ))}
+              </select>
 
-        {/* Add Record Form */}
-        <div className="mb-6 p-4 border border-blue-300 rounded-lg bg-blue-50">
-          <div className="grid grid-cols-1 sm:grid-cols-5 gap-5">
-            {/* 選擇類別 */}
-            <select
-              className="p-2 border rounded font-semibold text-green-600 dark:text-green-600"
-              value={newRecord.vitalTypeId}
-              onChange={(e) =>
-                setNewRecord({
-                  ...newRecord,
-                  vitalTypeId: e.target.value,
-                  value: "",
-                })
-              }
-            >
-              <option value="">選擇類別</option>
-              {vitalTypeOptions.map((opt) => (
-                <option key={opt.id} value={String(opt.id)}>
-                  {opt.name}
-                </option>
-              ))}
-            </select>
+              {/* 輸入數值 */}
+              <input
+                type="number"
+                placeholder={
+                  vitalMeta[newRecord.vitalTypeId]?.placeholder || "✏️輸入數值"
+                }
+                className="p-2 border rounded font-semibold text-green-600 dark:text-green-600"
+                value={newRecord.value}
+                onChange={(e) =>
+                  setNewRecord({ ...newRecord, value: e.target.value })
+                }
+              />
 
-            {/* 輸入數值 */}
-            <input
-              type="number"
-              placeholder={
-                vitalMeta[newRecord.vitalTypeId]?.placeholder || "✏️輸入數值"
-              }
-              className="p-2 border rounded font-semibold text-green-600 dark:text-green-600"
-              value={newRecord.value}
-              onChange={(e) =>
-                setNewRecord({ ...newRecord, value: e.target.value })
-              }
-            />
+              {/* 輸入備註 */}
+              <input
+                type="text"
+                placeholder="✏️輸入備註"
+                className="p-2 border rounded font-semibold text-green-600 dark:text-green-600 col-span-2"
+                value={newRecord.comment}
+                onChange={(e) =>
+                  setNewRecord({ ...newRecord, comment: e.target.value })
+                }
+              />
 
-            {/* 輸入備註 */}
-            <input
-              type="text"
-              placeholder="✏️輸入備註"
-              className="p-2 border rounded font-semibold text-green-600 dark:text-green-600 col-span-2"
-              value={newRecord.comment}
-              onChange={(e) =>
-                setNewRecord({ ...newRecord, comment: e.target.value })
-              }
-            />
-
-            {/* 送出按鈕 */}
-            <button
-              className="p-2 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 transition"
-              onClick={handleAddRecord}
-              disabled={loading}
-            >
-              {loading ? "處理中..." : "新增"}
-            </button>
+              {/* 送出按鈕 */}
+              <button
+                className="p-2 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600 transition"
+                onClick={handleAddRecord}
+                disabled={loading}
+              >
+                {loading ? "處理中..." : "新增"}
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Records List */}
         {loading ? (
@@ -660,18 +663,23 @@ const VitalSignsPage: React.FC = () => {
                       </p>
                     </div>
                     <div className="flex space-x-2">
-                      {/* 編輯icon */}
-                      <button onClick={() => openEdit(record)} title="編輯">
-                        <Pencil className="w-8 h-8 text-blue-500 hover:text-blue-700" />
-                      </button>
-                      {/* 刪除icon */}
-                      <button
-                        onClick={() => confirmDelete(record.signId!)}
-                        title="刪除"
-                      >
-                        <Trash2 className="w-8 h-8 text-red-500 hover:text-red-700" />
-                      </button>
-                    </div>
+                    {/* 只有 user.role === 0 時才顯示編輯與刪除icon */}
+                    {user && user.role === 0 && (
+                      <>
+                        {/* 編輯icon */}
+                        <button onClick={() => openEdit(record)} title="編輯">
+                          <Pencil className="w-8 h-8 text-blue-500 hover:text-blue-700" />
+                        </button>
+                        {/* 刪除icon */}
+                        <button
+                          onClick={() => confirmDelete(record.signId!)}
+                          title="刪除"
+                        >
+                          <Trash2 className="w-8 h-8 text-red-500 hover:text-red-700" />
+                        </button>
+                      </>
+                    )}
+                  </div>
                   </>
                 </li>
               );
