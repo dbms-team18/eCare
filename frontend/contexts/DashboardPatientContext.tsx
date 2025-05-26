@@ -39,7 +39,7 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({ child
   return (
     <PatientContext.Provider value={{ 
       patientName, 
-      patientId, 
+      patientId: patientId ?? 0, 
       setPatient }}>
       {children}
     </PatientContext.Provider>
