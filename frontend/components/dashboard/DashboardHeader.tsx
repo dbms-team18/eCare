@@ -1,11 +1,14 @@
 "use client";
 
+// 套件
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { HiOutlineBell, HiMiniBell } from "react-icons/hi2";
+
+// 本機檔案
 import { useUser } from "@/contexts/DashboardUserContext";
 import { usePatient } from "@/contexts/DashboardPatientContext";
 import { useAlert } from "@/contexts/DashboardAlertContext";
-import { all } from "axios";
 
 type DashboardHeaderProps = {
   alertTriggered?: number;
@@ -88,11 +91,10 @@ useEffect(() => {
         <ul className="flex items-center space-x-5">
           <li>
             <button className="group" onClick={handleAlertClick}>
-              <img
-                src={alertTriggered === 1 ? "/bell-alert.svg" : "/bell.svg"}
-                alt="Bell Icon"
-                className="w-10 h-10 group-hover:scale-110 transition-transform duration-200"
-              />
+              {alertTriggered === 1 ? (
+                <HiMiniBell className="text-red-500  w-11 h-11 animate-bounce group-hover:scale-110 transition-transform duration-200 cursor-pointer" />) : 
+                (<HiOutlineBell className="text-black  border-black w-11 h-11 group-hover:scale-110 transition-transform duration-200 cursor-pointer" />)
+                }
             </button>
           </li>
           <li>
@@ -100,7 +102,7 @@ useEffect(() => {
               <img
                 src="/record.svg"
                 alt="Record Icon"
-                className="w-10 h-10 group-hover:scale-110 transition-transform duration-200"
+                className="w-10 h-10 group-hover:scale-110 transition-transform duration-200 cursor-pointer"
               />
             </button>
           </li>
@@ -115,7 +117,7 @@ useEffect(() => {
               <img
                 src="/home.svg"
                 alt="Home Icon"
-                className="w-10 h-10 group-hover:scale-110 transition-transform duration-200"
+                className="w-10 h-10 group-hover:scale-110 transition-transform duration-200 cursor-pointer"
               />
             </button>
           </li>
@@ -124,7 +126,7 @@ useEffect(() => {
               <img
                 src="/profile.svg"
                 alt="Profile Icon"
-                className="w-10 h-10 group-hover:scale-110 transition-transform duration-200"
+                className="w-10 h-10 group-hover:scale-110 transition-transform duration-200 cursor-pointer"
               />
             </button>
           </li>
