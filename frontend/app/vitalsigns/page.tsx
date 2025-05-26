@@ -663,18 +663,23 @@ const VitalSignsPage: React.FC = () => {
                       </p>
                     </div>
                     <div className="flex space-x-2">
-                      {/* 編輯icon */}
-                      <button onClick={() => openEdit(record)} title="編輯">
-                        <Pencil className="w-8 h-8 text-blue-500 hover:text-blue-700" />
-                      </button>
-                      {/* 刪除icon */}
-                      <button
-                        onClick={() => confirmDelete(record.signId!)}
-                        title="刪除"
-                      >
-                        <Trash2 className="w-8 h-8 text-red-500 hover:text-red-700" />
-                      </button>
-                    </div>
+                    {/* 只有 user.role === 0 時才顯示編輯與刪除icon */}
+                    {user && user.role === 0 && (
+                      <>
+                        {/* 編輯icon */}
+                        <button onClick={() => openEdit(record)} title="編輯">
+                          <Pencil className="w-8 h-8 text-blue-500 hover:text-blue-700" />
+                        </button>
+                        {/* 刪除icon */}
+                        <button
+                          onClick={() => confirmDelete(record.signId!)}
+                          title="刪除"
+                        >
+                          <Trash2 className="w-8 h-8 text-red-500 hover:text-red-700" />
+                        </button>
+                      </>
+                    )}
+                  </div>
                   </>
                 </li>
               );
