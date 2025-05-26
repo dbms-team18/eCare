@@ -4,23 +4,55 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useUser } from "@/contexts/DashboardUserContext";
 import { usePatient } from "@/contexts/DashboardPatientContext";
+import { useAlert } from "@/contexts/DashboardAlertContext";
 import { all } from "axios";
 
 type DashboardHeaderProps = {
-  alertTriggered?: boolean;
+  alertTriggered?: number;
   patientName: string;
   isCaregiver: number;
 };
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({
-  alertTriggered,
-}) => {
+
+
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
   const router = useRouter();
   const { isCaregiver } = useUser();
   const { patientName, patientId } = usePatient();
-  const [allAlertData, setAllAlertData] = useState<any[]>([]);
+  const { alertTriggered, setalertTriggered } = useAlert(); // 如果你只要用來顯示圖示
 
-  // 可以用 useEffect 在元件掛載時或patientId改變時拉資料
+
+
+  // 可以用 useEffect 在元件掛載時或 patientId 改變時拉資料
+useEffect(() => {
+  const fetchAlertStatus = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/alert/getUnread", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ patientID: patientId }),
+      });
+      const result = await res.json();
+      if (result.success && Array.isArray(result.allAlertData)) {
+        const isTriggered = result.allAlertData.length > 0;
+        setalertTriggered(isTriggered ? 1 : 0);
+      } else {
+        setalertTriggered(0);
+      }
+    } catch (err) {
+      setalertTriggered(0);
+    }
+  };
+
+  if (patientId) {
+    fetchAlertStatus(); // 初次執行一次
+    const interval = setInterval(fetchAlertStatus, 10000); // 每 10 秒檢查一次
+    return () => clearInterval(interval); // 清除定時器
+  }
+}, [patientId]);
+
+
 
   const handleAlertClick = () => {
     router.push(`/alert?patientId=${patientId}`);
@@ -57,7 +89,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <li>
             <button className="group" onClick={handleAlertClick}>
               <img
-                src={allAlertData.length > 0 ? "/bell-alert.svg" : "/bell.svg"}
+                src={alertTriggered === 1 ? "/bell-alert.svg" : "/bell.svg"}
                 alt="Bell Icon"
                 className="w-10 h-10 group-hover:scale-110 transition-transform duration-200"
               />

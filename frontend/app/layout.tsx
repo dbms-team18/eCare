@@ -5,6 +5,8 @@ import "./globals.css";
 // 引入 context
 import { UserProvider } from "@/contexts/DashboardUserContext";
 import { PatientProvider } from "@/contexts/DashboardPatientContext";
+import { AlertProvider } from "@/contexts/DashboardAlertContext";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +35,9 @@ export default function RootLayout({
       >
         <UserProvider>
           <PatientProvider>
-            {children}
+            <AlertProvider>
+              {children}
+            </AlertProvider>
           </PatientProvider>
         </UserProvider>
       </body>

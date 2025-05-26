@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { BiUser, BiPlus, BiArrowBack } from 'react-icons/bi'
 import { FaExchangeAlt } from "react-icons/fa";
 import { usePatient } from '@/contexts/DashboardPatientContext';
+import { useAlert } from '@/contexts/DashboardAlertContext'
 
 interface Patient {
   patientId: number;
@@ -18,6 +19,7 @@ interface Patient {
 }
 
 export default function ProfilePage() {
+    const {alertTriggered, setalertTriggered} = useAlert()
     const { setPatient } = usePatient();
     const router = useRouter()
     const [patients, setPatients] = useState<Patient[]>([]);
@@ -48,24 +50,58 @@ useEffect(() => {
       });
   }, []);
 
+ const fetchAlerts = async (patientId: string) => {
+
+  try {
+    const res = await fetch("http://localhost:3001/api/alert/getUnread", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ 
+        patientID: patientId }),
+    });
+
+    const result = await res.json();
+    if (result.success && Array.isArray(result.allAlertData)) {
+      
+      // 有 alert 就設為觸發
+      const isTriggered = result.allAlertData.length > 0;
+      localStorage.setItem("alertTriggered",isTriggered? "1" : "0")
+      setalertTriggered(isTriggered > 0 ? 1 : 0)
+      console.log("成功回傳:", result);
+    } else {
+      console.warn("警報資料格式錯誤:", result);
+      localStorage.setItem("alertTriggered", "0");
+      setalertTriggered(0);
+    }
+  } catch (err) {
+    console.error("警報資料取得失敗:", err);
+    localStorage.setItem("alertTriggered", "0");
+    setalertTriggered(0);
 
 
-    const handleSubmit = () => {
-        const selected = patients.find((p) => String(p.patientId) === selectedId)
-        if (selected) {
-            setPatient({ patientId: Number(selected.patientId), name: selected.name });
-            console.log("Selected ID:", selectedId);
-            console.log("Selected Patient:", selected); 
-            localStorage.setItem('currentPatient', JSON.stringify(selected)) // 先暫存
-            router.push('/dashboard')
-            alert(`已切換至個案：${selected.name}`)
-            
-        } else {
-            console.log("Selected ID:", selectedId);
-            console.log("Selected Patient:", selected);
-            alert('請先選擇一位個案')
-        }
-      }
+  }
+};
+
+
+
+    const handleSubmit = async () => {
+    const selected = patients.find((p) => String(p.patientId) === selectedId);
+    if (!selected) {
+    alert("請先選擇一位個案");
+    return;
+  }
+
+  setPatient({ patientId: Number(selected.patientId), name: selected.name });
+  localStorage.setItem("currentPatient", JSON.stringify(selected));
+  console.log("Selected ID:", selectedId);
+  console.log("Selected Patient:", selected);
+
+  await fetchAlerts(selectedId); // 呼叫正確的警報 fetch 函式
+
+  alert(`已切換至個案：${selected.name}`);
+  router.push("/dashboard");
+};
 
     return (
       <div>

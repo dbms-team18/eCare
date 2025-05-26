@@ -20,7 +20,7 @@ export const getUnread = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== "POST") return res.status(405).end();
 
   // userID 從 cookie 抓
-  const cookies = parse(req.headers.cookie || "");
+  // const cookies = parse(req.headers.cookie || "");
   // const userID = cookies.uid;
   // if (!userID) {
   //   return res.status(401).json({ success: false, message: '未登入' });
