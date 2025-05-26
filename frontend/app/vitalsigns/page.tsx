@@ -10,12 +10,11 @@ import { useSearchParams } from "next/navigation";
 import axios from "axios";
 
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
-import { useUser } from '@/contexts/DashboardUserContext';
-import { usePatient } from '@/contexts/DashboardPatientContext';
+import { useUser } from "@/contexts/DashboardUserContext";
+import { usePatient } from "@/contexts/DashboardPatientContext";
 import { idToCategory, vitalTypeOptions } from "@/constants/vitalSignMap";
 import { formatCreateDate } from "@/lib/format";
 import { useAuth } from "@/contexts/AuthContext";
-
 
 // Define interfaces
 interface VitalSignRecord {
@@ -72,10 +71,9 @@ const VitalSignsPage: React.FC = () => {
   const vitalTypeIdFromQuery = searchParams.get("category") || "";
 
   // 從 context 抓 userId, patientId
-  const {isCaregiver, userId} = useUser();
-  const {patientName, patientId} = usePatient();
-  const { user, loading: authLoading } = useAuth();
-
+  const { isCaregiver, userId, role } = useUser();
+  const { patientName, patientId } = usePatient();
+  const { loading: authLoading } = useAuth();
 
   // State hooks
   const [records, setRecords] = useState<VitalSignRecord[]>([]);
@@ -104,10 +102,10 @@ const VitalSignsPage: React.FC = () => {
 
   // Fetch data on mount
   useEffect(() => {
-  if (userId && patientId) {
-    fetchVitalSigns();
-  }
-}, [userId, patientId]);
+    if (patientId) {
+      fetchVitalSigns();
+    }
+  }, [patientId]);
 
   // Update form when query param changes
   useEffect(() => {
@@ -124,52 +122,52 @@ const VitalSignsPage: React.FC = () => {
   // const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
   const fetchVitalSigns = async () => {
     try {
-      setLoading(true);         // 開始載入
-      setError(null);           // 清除前一次錯誤訊息
+      setLoading(true); // 開始載入
+      setError(null); // 清除前一次錯誤訊息
 
-  // 設定查詢參數
-  const params = new URLSearchParams({
-    userId: userId.toString(),
-    patientId: patientId.toString(),
-  });
+      // 設定查詢參數
+      const params = new URLSearchParams({
+        // userId: userId.toString(),
+        patientId: patientId.toString(),
+      });
 
-  // 發送 API 請求
-  const response = await fetch(`http://localhost:3001/api/vitalSign/getAll?${params.toString()}`);
+      // 發送 API 請求
+      const response = await fetch(
+        `http://localhost:3001/api/vitalSign/getAll?${params.toString()}`
+      );
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.err || "獲取生理指標失敗");
-  }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.err || "獲取生理指標失敗");
+      }
 
-  const data = await response.json();
+      const data = await response.json();
 
-  // 判斷是否成功並有資料
-  if (data.success) {
-    const vitalSigns = data.vitalSigns || [];
+      // 判斷是否成功並有資料
+      if (data.success) {
+        const vitalSigns = data.vitalSigns || [];
 
-    if (vitalSigns.length === 0) {
-      setError("目前尚無任何生理資料");
+        if (vitalSigns.length === 0) {
+          setError("目前尚無任何生理資料");
+          setRecords([]);
+        } else {
+          const transformedData = transformApiDataToFrontend(vitalSigns);
+          setRecords(transformedData);
+        }
+      } else {
+        throw new Error(data.err || "資料取得失敗");
+      }
+    } catch (error) {
+      console.error("獲取生理指標出錯:", error);
+      setError(error instanceof Error ? error.message : "獲取資料失敗");
       setRecords([]);
-    } else {
-      const transformedData = transformApiDataToFrontend(vitalSigns);
-      setRecords(transformedData);
+    } finally {
+      setLoading(false);
     }
-  } else {
-    throw new Error(data.err || "資料取得失敗");
-  }
-} catch (error) {
-  console.error("獲取生理指標出錯:", error);
-  setError(error instanceof Error ? error.message : "獲取資料失敗");
-  setRecords([]);
-} finally {
-  setLoading(false);
-}
-
   };
   // 資料轉換函數
   const transformApiDataToFrontend = (apiData: any[]): VitalSignRecord[] => {
     return apiData.map((item) => {
-      
       // 轉換 recordDateTime 到 create_date (YYYYMMDDHHmm 格式)
       const recordDate = new Date(item.recordDateTime);
       const create_date = Number(
@@ -378,7 +376,7 @@ const VitalSignsPage: React.FC = () => {
 
       // Create UI record object
       const uiRecord: any = {
-        signId: newId.signId || '',
+        signId: newId.signId || "",
         userId: Number(userId),
         patientId: Number(patientId),
         vitalTypeId: Number(newRecord.vitalTypeId),
@@ -409,7 +407,6 @@ const VitalSignsPage: React.FC = () => {
           uiRecord.weight = Number(newRecord.value);
           break;
       }
-
 
       // Reset form
       setNewRecord({
@@ -570,7 +567,10 @@ const VitalSignsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-green-50 to-yellow-50 p-4">
       <div className="max-w-6xl mx-auto bg-white rounded-3xl p-8 shadow-md">
-        <DashboardHeader isCaregiver={user && user.role === 0 ? 1 : 0} patientName={patientName} />
+        <DashboardHeader
+          isCaregiver={role === 0 ? 1 : 0}
+          patientName={patientName}
+        />
         <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
           健康紀錄
         </h1>
@@ -582,7 +582,7 @@ const VitalSignsPage: React.FC = () => {
           </div>
         )}
         {/* 只有 user.role === 0 時才顯示新增表單 */}
-        {user && user.role === 0 && (
+        {role === 0 && (
           <div className="mb-6 p-4 border border-blue-300 rounded-lg bg-blue-50">
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-5">
               {/* 選擇類別 */}
@@ -663,28 +663,27 @@ const VitalSignsPage: React.FC = () => {
                       </p>
                     </div>
                     <div className="flex space-x-2">
-                    {/* 只有 user.role === 0 時才顯示編輯與刪除icon */}
-                    {user && user.role === 0 && (
-                      <>
-                        {/* 編輯icon */}
-                        <button onClick={() => openEdit(record)} title="編輯">
-                          <Pencil className="w-8 h-8 text-blue-500 hover:text-blue-700" />
-                        </button>
-                        {/* 刪除icon */}
-                        <button
-                          onClick={() => confirmDelete(record.signId!)}
-                          title="刪除"
-                        >
-                          <Trash2 className="w-8 h-8 text-red-500 hover:text-red-700" />
-                        </button>
-                      </>
-                    )}
-                  </div>
+                      {/* 只有 role === 0 時才顯示編輯與刪除icon */}
+                      {role === 0 && (
+                        <>
+                          {/* 編輯icon */}
+                          <button onClick={() => openEdit(record)} title="編輯">
+                            <Pencil className="w-8 h-8 text-blue-500 hover:text-blue-700" />
+                          </button>
+                          {/* 刪除icon */}
+                          <button
+                            onClick={() => confirmDelete(record.signId!)}
+                            title="刪除"
+                          >
+                            <Trash2 className="w-8 h-8 text-red-500 hover:text-red-700" />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </>
                 </li>
               );
             })}
-
           </ul>
         )}
         {/* Success Popup */}

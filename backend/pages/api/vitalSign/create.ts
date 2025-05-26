@@ -15,7 +15,7 @@ const createVitalSign = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, err: "Method Not Allowed" });
   }
-// 要接收的封包格式
+  // 要接收的封包格式
   const {
     userId,
     patientId,
@@ -107,8 +107,8 @@ const createVitalSign = async (req: NextApiRequest, res: NextApiResponse) => {
     // 插入生理資料
     const [result] = await connection.execute<ResultSetHeader>(
       `
-      INSERT INTO vitalsigns (userId, patientId, vitalTypeId, value, recordDateTime, comment, alertTrigger)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO vitalsigns (userId, patientId, vitalTypeId, value, recordDateTime, comment, alertTrigger,status)
+      VALUES (?, ?, ?, ?, ?, ?, ?,0)
       `,
       [
         userId,
@@ -127,14 +127,11 @@ const createVitalSign = async (req: NextApiRequest, res: NextApiResponse) => {
     if (alertTrigger) {
       try {
         // 呼叫 alert/create API
-        await axios.post(
-          `http://localhost:3001/api/alert/createAlert`,
-          {
-            userId:userId,
-            patientId:patientId,
-            vitalTypeId:vitalTypeId            
-          }
-        );
+        await axios.post(`http://localhost:3001/api/alert/createAlert`, {
+          userId: userId,
+          patientId: patientId,
+          vitalTypeId: vitalTypeId,
+        });
       } catch {
         // 即使警報創建失敗，我們仍然繼續執行
         console.error("警報創建失敗");
