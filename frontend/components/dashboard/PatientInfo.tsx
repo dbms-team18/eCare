@@ -1,12 +1,16 @@
 import React from "react";
+import { useAlert } from "@/contexts/DashboardAlertContext";
 
 type PatientInfoProps = {
   alertTriggered: boolean;
 };
 
-const PatientInfo: React.FC<PatientInfoProps> = ({ alertTriggered }) => {
-  // const message = alertTriggered ? "請查看健康警示" : "繼續保持！";
-  const message = "請記得每日記錄喔！";
+
+
+const PatientInfo: React.FC<PatientInfoProps> = ({}) => {
+  const {alertTriggered} = useAlert();
+  const message = alertTriggered ? "請查看健康警示!!" : "繼續保持！";
+  // const message = "請記得每日記錄喔！";
   return (
     <div className="col-span-3">
       <div className="bg-white p-4 rounded-xl shadow-sm border mb-6">

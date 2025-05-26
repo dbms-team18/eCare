@@ -4,7 +4,8 @@
 import Button from "../../../components/Button";
 import UserInfoHeader from "../../../components/UserInfoHeader";
 import { useRouter } from "next/navigation";
-import { BiUser, BiPlus, BiEdit } from "react-icons/bi";
+import { BiUser,  BiEdit } from "react-icons/bi";
+import { MdDelete, MdAdd } from "react-icons/md";
 import { FaExchangeAlt } from "react-icons/fa";
 import { usePatient } from "@/contexts/DashboardPatientContext";
 import { useAlert } from "@/contexts/DashboardAlertContext"
@@ -94,6 +95,7 @@ export default function ProfilePage() {
   router.push(`/patient/modify?patientId=${selectedId}`);
   }
 
+  // 切換
   const handleSubmit = async () => {
     const selected = patients.find((p) => String(p.patientId) === selectedId);
     if (!selected) {
@@ -111,6 +113,51 @@ export default function ProfilePage() {
   alert(`已切換至個案：${selected.name}`);
   router.push("/dashboard");
 };
+// 刪除
+  const handleDelete = () => {
+  const selected = patients.find((p) => String(p.patientId) === selectedId);
+
+  if (!selected) {
+    alert("請先選擇一位個案");
+    return;
+  }
+
+  const confirmed = window.confirm("確定要刪除該個案嗎？");
+
+  if (!confirmed) {
+    return; // 使用者按取消就不執行
+  }
+
+  // 確定後進行刪除 API 呼叫
+  // 你可以在這裡加入 fetch 請求
+  fetch("http://localhost:3001/api/patient/delete", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include", // 如果用 cookie 驗證
+    body: JSON.stringify({ patientId: selected.patientId }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        alert("刪除成功！");
+        // 重新載入個案列表或移除這筆資料
+        setPatients((prev) =>
+          prev.filter((p) => p.patientId !== selected.patientId)
+        );
+        setSelectedId(""); // 同時清空選擇
+      } else {
+        alert("刪除失敗：" + data.message);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("刪除過程中發生錯誤");
+    });
+};
+
+
 
   return (
     <div>
@@ -182,25 +229,34 @@ export default function ProfilePage() {
 
             {patients.length > 0 && (
               <Button
+                label="確認切換"
+                icon={FaExchangeAlt}
+                className="w-full cursor-pointer"
+                onClick={handleSubmit}
+              />
+            )}
+            
+            {patients.length > 0 && (
+              <Button
                 label="修改資料"
                 icon={BiEdit}
                 className="w-full cursor-pointer"
                 onClick={handleModify}
               />
             )}
-            
             <Button
               label="新增病患"
-              icon={BiPlus}
+              icon={MdAdd}
               className="w-full cursor-pointer"
               onClick={() => router.push("/patient/add")}
             />
-            {patients.length > 0 && (
+            
+             {patients.length > 0 && (
               <Button
-                label="確認切換"
-                icon={FaExchangeAlt}
+                label="刪除資料"
+                icon={MdDelete}
                 className="w-full cursor-pointer"
-                onClick={handleSubmit}
+                onClick={handleDelete}
               />
             )}
           </div>

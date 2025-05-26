@@ -7,9 +7,11 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BiUser, BiPlus, BiArrowBack } from 'react-icons/bi'
+import { FaFileAlt } from "react-icons/fa";
 import { FaExchangeAlt } from "react-icons/fa";
 import { usePatient } from '@/contexts/DashboardPatientContext';
 import { useAlert } from '@/contexts/DashboardAlertContext'
+import { constants } from 'buffer'
 
 interface Patient {
   patientId: number;
@@ -27,7 +29,7 @@ export default function ProfilePage() {
     const [isLoading, setIsLoading] = useState(true);
 
 useEffect(() => {
-    fetch("http://localhost:3001/api/patient/getAll", {
+    fetch("http://localhost:3001/api/patient/getAllAndArchived", {
       credentials: "include", // 加這行才能送出 cookie
     })
       .then((res) => res.json())
@@ -83,8 +85,15 @@ useEffect(() => {
   }
 };
 
+const handleReview = async () =>{
+    router.push("/patient/delete");
+}
 
 
+
+
+
+// 確認切換
     const handleSubmit = async () => {
     const selected = patients.find((p) => String(p.patientId) === selectedId);
     if (!selected) {
@@ -152,18 +161,19 @@ useEffect(() => {
 
             {/* 功能按鈕 */}
             <div className="flex flex-col items-center space-y-3">
-            <Button
-                label="綁定病患"
-                icon={BiPlus}
-                className="w-full cursor-pointer"
-                onClick={() => router.push('/patient/bind')}
-              />
               <Button
                 label="確認切換"
                 icon={FaExchangeAlt}
                 className="w-full cursor-pointer"
                 onClick={handleSubmit}
               />
+              <Button
+                label="綁定病患"
+                icon={BiPlus}
+                className="w-full cursor-pointer"
+                onClick={() => router.push('/patient/bind')}
+              />
+              
               
             </div>
           </div>
